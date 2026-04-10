@@ -1,0 +1,581 @@
+import WhatsAppService from '../services/whatsappService.js';
+import * as XLSX from 'xlsx';
+import { v4 as uuidv4 } from 'uuid';
+import Form from '../models/Form.js';
+import FormInvite from '../models/FormInvite.js';
+import Tenant from '../models/Tenant.js';
+
+// Helper: Validate email format (basic)
+const isValidEmail = (email) => {
+  if (!email || typeof email !== "string") return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim().toLowerCase());
+};
+
+// Helper: Validate phone format (basic)
+const isValidPhone = (phone) => {
+  if (!phone) return false;
+  
+  const phoneStr = phone.toString().trim();
+  
+  // Remove all non-digit characters except +
+  const cleaned = phoneStr.replace(/[^\d+]/g, '');
+  
+  // Basic validation: 10-15 digits
+  const digitCount = cleaned.replace(/\D/g, '').length;
+  return digitCount >= 10 && digitCount <= 15;
+};
+
+// Helper: Parse Excel file for WhatsApp
+const parseWhatsAppExcel = (buffer) => {
+  try {
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    
+    // Convert to JSON with header:1 to get raw array
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    if (!data || data.length === 0) {
+      throw new Error('Excel file is empty');
+    }
+    
+    let phoneIndex = -1;
+    let emailIndex = -1;
+    let startRow = 1; // Default: assume row 0 is header
+
+    // 1. Try to find headers in the first row
+    const firstRowParsed = data[0].map(h => h ? h.toString().toLowerCase().trim() : '');
+    
+    phoneIndex = firstRowParsed.findIndex(h => 
+      h.includes('phone') || h.includes('mobile') || h.includes('contact') || h === 'phone'
+    );
+    
+    emailIndex = firstRowParsed.findIndex(h => 
+      h.includes('email') || h.includes('mail') || h === 'email'
+    );
+    
+    // 2. If NO headers found, or only one, check if first row is actually data
+    if (phoneIndex === -1 && emailIndex === -1) {
+      // Logic for files WITHOUT headers
+      startRow = 0; // No header, start from first row
+      
+      // Guess columns by checking first row content
+      data[0].forEach((cell, idx) => {
+        if (!cell) return;
+        const cellStr = cell.toString().trim();
+        
+        if (isValidEmail(cellStr)) {
+          emailIndex = idx;
+        } else {
+          // If it looks like a phone number (mostly digits)
+          const digitsOnly = cellStr.replace(/\D/g, '');
+          if (digitsOnly.length >= 10 && digitsOnly.length <= 15) {
+            phoneIndex = idx;
+          }
+        }
+      });
+      
+      // Fallback: If still not found but we have columns, assign them by position
+      if (phoneIndex === -1 && data[0].length > 0) {
+          // Find first col that isn't the email index
+          phoneIndex = data[0].findIndex((_, idx) => idx !== emailIndex);
+          if (phoneIndex === -1) phoneIndex = 0;
+      }
+    }
+    
+    if (phoneIndex === -1) {
+      throw new Error('Excel must contain a "Phone" column');
+    }
+    
+    const records = [];
+    const seenPhones = new Set();
+    
+    for (let i = startRow; i < data.length; i++) {
+      const row = data[i];
+      if (!row || row.length === 0) continue;
+      
+      let phone = '';
+      if (row[phoneIndex] !== undefined && row[phoneIndex] !== null) {
+        phone = row[phoneIndex].toString().trim();
+        // Keep original for validation but clean for storage
+        const cleanPhone = phone.replace(/[^\d+]/g, '');
+        
+        if (cleanPhone && !seenPhones.has(cleanPhone)) {
+          seenPhones.add(cleanPhone);
+          
+          let email = '';
+          if (emailIndex !== -1 && row[emailIndex] !== undefined && row[emailIndex] !== null) {
+            email = row[emailIndex].toString().trim().toLowerCase();
+          }
+          
+          records.push({
+            phone: cleanPhone,
+            originalPhone: phone,
+            email
+          });
+        }
+      }
+    }
+    
+    return records;
+  } catch (error) {
+    throw new Error(`Failed to parse Excel file: ${error.message}`);
+  }
+};
+
+export const uploadWhatsAppInvites = async (req, res) => {
+  try {
+    const { formId } = req.params;
+    
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({
+        success: false,
+        message: 'No Excel file provided'
+      });
+    }
+    
+    const form = await Form.findOne({ id: formId });
+    if (!form) {
+      return res.status(404).json({
+        success: false,
+        message: 'Form not found'
+      });
+    }
+    
+    const records = parseWhatsAppExcel(req.file.buffer);
+    
+    const validRecords = [];
+    const invalidRecords = [];
+    const seenPhones = new Set();
+    
+    for (const record of records) {
+      if (isValidPhone(record.phone)) {
+        validRecords.push({
+          phone: record.phone,
+          email: record.email || '',
+          status: 'valid'
+        });
+        seenPhones.add(record.phone);
+      } else {
+        invalidRecords.push({
+          phone: record.originalPhone,
+          issues: ['Invalid phone format']
+        });
+      }
+    }
+    
+    // Check existing invites
+    const existingInvites = await FormInvite.find({
+      formId,
+      phone: { $in: validRecords.map(r => r.phone) }
+    }).select('phone status');
+    
+    const existingMap = new Map();
+    existingInvites.forEach(invite => {
+      existingMap.set(invite.phone, invite.status);
+    });
+    
+    const preview = validRecords.map(record => ({
+      ...record,
+      existingStatus: existingMap.get(record.phone) || null
+    }));
+    
+    const tenant = await Tenant.findById(form.tenantId);
+    const tenantSlug = tenant?.slug || 'public';
+    const baseUrl = process.env.INVITE_FRONTEND_URL || 'https://forms.focusengineeringapp.com';
+    
+    res.json({
+      success: true,
+      message: 'Excel processed successfully',
+      data: {
+        totalRecords: records.length,
+        valid: validRecords.length,
+        invalid: invalidRecords.length,
+        duplicatePhones: records.length - seenPhones.size,
+        preview: preview.slice(0, 10),
+        sampleLink: `${baseUrl}/${tenantSlug}/forms/${formId}?inviteId=SAMPLE_INVITE_ID`,
+        form: {
+          id: form.id,
+          title: form.title,
+          inviteOnlyTracking: form.inviteOnlyTracking || false
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Upload WhatsApp invites error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to process Excel file'
+    });
+  }
+};
+
+export const sendWhatsAppInvites = async (req, res) => {
+  try {
+    const { formId } = req.params;
+    const { phones, language = 'en' } = req.body; 
+    
+    if (!Array.isArray(phones) || phones.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phones array is required'
+      });
+    }
+    
+    const form = await Form.findOne({ id: formId });
+    if (!form) {
+      return res.status(404).json({
+        success: false,
+        message: 'Form not found'
+      });
+    }
+    
+    const tenant = await Tenant.findById(form.tenantId);
+    if (!tenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found'
+      });
+    }
+    
+    const results = [];
+    const failed = [];
+    
+    console.log(`🔄 Sending ${phones.length} WhatsApp invites sequentially (Language: ${language})...`);
+
+    for (const record of phones) {
+      try {
+        const phone = record.phone.trim();
+        const email = record.email ? record.email.toLowerCase().trim() : '';
+        
+        let invite = await FormInvite.findOne({
+          formId,
+          phone
+        });
+        
+        const isResponded = invite && invite.status === 'responded';
+        const inviteId = isResponded || !invite ? uuidv4() : invite.inviteId;
+        const baseUrl = process.env.INVITE_FRONTEND_URL || 'https://forms.focusengineeringapp.com';
+        const inviteLink = `${baseUrl}/${tenant.slug}/forms/${formId}?inviteId=${inviteId}`;
+        
+        const whatsappResult = await WhatsAppService.sendFormInvite(
+          phone,
+          form.title,
+          inviteLink,
+          tenant.name,
+          language
+        );
+        
+        if (whatsappResult.success) {
+          if (invite && !isResponded) {
+            invite.sentAt = new Date();
+            await invite.save();
+          } else {
+            const newInvite = new FormInvite({
+              formId,
+              tenantId: form.tenantId,
+              phone,
+              email: email || undefined,
+              inviteId,
+              status: 'sent',
+              createdBy: req.user?._id,
+              previousInviteId: isResponded ? invite.inviteId : undefined
+            });
+            await newInvite.save();
+          }
+          
+          results.push({
+            phone,
+            status: 'sent',
+            inviteId,
+            strategy: whatsappResult.strategy,
+            twilioStatus: whatsappResult.status
+          });
+        } else {
+          failed.push({
+            phone,
+            reason: `${whatsappResult.error}`
+          });
+        }
+
+        // Delay to prevent rate limits
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+      } catch (err) {
+        console.error(`❌ WhatsApp loop error for ${record?.phone}:`, err);
+        failed.push({
+          phone: record?.phone || 'unknown',
+          reason: err.message
+        });
+      }
+    }
+    
+    const overallSuccess = results.length > 0;
+
+    res.json({
+      success: overallSuccess,
+      message: overallSuccess 
+        ? `Successfully sent ${results.length} WhatsApp invites`
+        : `Failed to send WhatsApp invites`,
+      data: {
+        sent: results.length,
+        failed: failed.length,
+        results,
+        failures: failed
+      }
+    });
+    
+  } catch (error) {
+    console.error('Send WhatsApp invites error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send WhatsApp invites',
+      error: error.message
+    });
+  }
+};
+
+export const sendServiceRequestNotification = async (req, res) => {
+  try {
+    const { serviceRequest, customerInfo } = req.body;
+
+    if (!serviceRequest || !customerInfo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Service request and customer information are required'
+      });
+    }
+
+    if (!customerInfo.phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer phone number is required for WhatsApp'
+      });
+    }
+
+    const shopNotification = await WhatsAppService.sendServiceRequestNotification(serviceRequest, customerInfo);
+    
+    const customerConfirmation = await WhatsAppService.sendCustomerConfirmation(serviceRequest, customerInfo);
+
+    res.json({
+      success: true,
+      message: 'WhatsApp notifications sent successfully',
+      data: {
+        shopNotification,
+        customerConfirmation
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in sendServiceRequestNotification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send WhatsApp notifications',
+      error: error.message
+    });
+  }
+};
+
+export const sendStatusUpdate = async (req, res) => {
+  try {
+    const { serviceRequest, customerInfo, status, message, estimatedCompletion } = req.body;
+
+    if (!serviceRequest || !customerInfo || !status || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required (serviceRequest, customerInfo, status, message)'
+      });
+    }
+
+    if (!customerInfo.phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer phone number is required'
+      });
+    }
+
+    const result = await WhatsAppService.sendStatusUpdate(
+      serviceRequest, 
+      customerInfo, 
+      status, 
+      message, 
+      estimatedCompletion
+    );
+
+    res.json({
+      success: true,
+      message: 'WhatsApp status update sent successfully',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error in sendStatusUpdate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send WhatsApp status update',
+      error: error.message
+    });
+  }
+};
+
+export const testWhatsAppConnection = async (req, res) => {
+  try {
+    const result = await WhatsAppService.testConnection();
+    
+    res.json({
+      success: result.success,
+      message: result.success ? 'WhatsApp service is working correctly' : 'WhatsApp service connection failed',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error testing WhatsApp connection:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to test WhatsApp connection',
+      error: error.message
+    });
+  }
+};
+
+export const sendTestWhatsAppMessage = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    const result = await WhatsAppService.sendTestMessage(phone);
+    
+    res.json({
+      success: true,
+      message: 'Test WhatsApp message sent successfully',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error sending test WhatsApp message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send test WhatsApp message',
+      error: error.message
+    });
+  }
+};
+
+export const sendResponseReport = async (req, res) => {
+  try {
+    console.log('📱 sendResponseReport (WhatsApp) called');
+    console.log('User:', req.user?.email, 'Role:', req.user?.role);
+    console.log('req.body:', req.body);
+
+    const { phone, subject } = req.body;
+
+    console.log('Phone:', phone);
+    console.log('Subject:', subject);
+
+    if (!phone) {
+      console.error('❌ Missing phone number');
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    if (!subject) {
+      console.error('❌ Missing subject');
+      return res.status(400).json({
+        success: false,
+        message: 'Subject is required'
+      });
+    }
+
+    const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid phone number format'
+      });
+    }
+
+    console.log('Sending WhatsApp report notification...');
+    const result = await WhatsAppService.sendResponseReport(
+      phone,
+      subject,
+      null,
+      null
+    );
+
+    if (!result.success) {
+      console.error('❌ WhatsAppService returned error:', result.error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send WhatsApp notification',
+        error: result.error
+      });
+    }
+
+    console.log('✅ Report notification sent successfully via WhatsApp');
+    res.json({
+      success: true,
+      message: 'Report notification sent successfully via WhatsApp',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('❌ Error in sendResponseReport (WhatsApp):', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send report notification',
+      error: error.message
+    });
+  }
+};
+
+export const testResponseReportWhatsApp = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    const result = await WhatsAppService.sendResponseReport(
+      phone,
+      'Test Report - Response Report System',
+      null,
+      null
+    );
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Test WhatsApp notification sent successfully!',
+        data: result
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send test WhatsApp notification',
+        error: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error('Error in testResponseReportWhatsApp:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send test WhatsApp notification',
+      error: error.message
+    });
+  }
+};

@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads and temp files
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.tmp
+
+# Docker
+.dockerignore
+
+# Testing
+coverage/
+.nyc_output/
+
+# MongoDB
+*.mongodb
+mongo-data/
+
+# Sensitive files
+*.pem
+*.key
+*.cert
+credentials.json
+token.json
+
+# Lint / build output files
+lint-output.txt
+lint_output.txt
+lint_check.txt
+lint_full.txt
+lint-report.json
+lint-results.json
+lint_results.json
+build_output.txt
+out.txt
+
+# Stray bundle artifacts (root level)
+bundle.css
+bundle-http.txt
+
+# Excel import templates (not part of source)
+*.xlsx
