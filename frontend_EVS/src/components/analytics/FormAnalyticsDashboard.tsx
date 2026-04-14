@@ -653,7 +653,7 @@ export default function FormAnalyticsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [autoOpenSectionId, setAutoOpenSectionId] = useState<string | null>(null);
   const [analyticsView, setAnalyticsView] = useState<"question" | "section" | "table" | "responses" | "dashboard" | "comparison">(
-    "section"
+    "question"
   );
   const [tableViewType, setTableViewType] = useState<"question" | "section">("question");
   const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
@@ -3698,53 +3698,7 @@ export default function FormAnalyticsDashboard() {
                 
                 {selectedResponsesSectionIds.length > 0 ? (
                   <>
-                    {/* Overall Quiz Statistics Summary Bar */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4 shadow-sm">
-                      <div className="flex flex-wrap items-center justify-between gap-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                            <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Overall Quiz Statistics</p>
-                            <p className="text-lg font-bold text-gray-900 dark:text-white">Form Performance</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap items-center gap-8">
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Quiz Questions</span>
-                            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{overallStats.totalQuizQuestions}</span>
-                          </div>
-                          
-                          <div className="h-10 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
-                          
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Correct</span>
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-xl font-bold text-green-600 dark:text-green-400">{overallStats.totalCorrect}</span>
-                              <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Wrong</span>
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-xl font-bold text-red-600 dark:text-red-400">{overallStats.totalWrong}</span>
-                              <XCircle className="w-3.5 h-3.5 text-red-500" />
-                            </div>
-                          </div>
-                          
-                          <div className="h-10 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
-                          
-                          <div className="flex flex-col bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-lg border border-indigo-100 dark:border-indigo-800">
-                            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold uppercase">Average Accuracy</span>
-                            <span className="text-2xl font-black text-indigo-700 dark:text-indigo-300">{overallStats.averageAccuracy}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
+                    {/* Cleaned up overall quiz statistics */}
                     <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
                     <table className="text-sm border-collapse">
                       <thead className="sticky top-0 z-10">
@@ -3752,7 +3706,6 @@ export default function FormAnalyticsDashboard() {
                           <td className="px-3 py-3 border border-indigo-200 dark:border-indigo-700"></td>
                           <td className="px-6 py-3 border border-indigo-200 dark:border-indigo-700"></td>
                           <td className="px-6 py-3 border border-indigo-200 dark:border-indigo-700"></td>
-                          <td colSpan={2} className="px-6 py-3 text-center font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">Performance</td>
                           {form?.sections?.map((section: Section) => {
                             const sectionQuestionsCount = section.questions?.length || 0;
                             return (
@@ -3782,8 +3735,6 @@ export default function FormAnalyticsDashboard() {
                           </th>
                           <th className="sticky left-12 z-20 text-left px-6 py-3 font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider border border-gray-200 dark:border-gray-700 min-w-32 whitespace-nowrap bg-gray-100 dark:bg-gray-800">Actions</th>
                           <th className="text-left px-6 py-3 font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider border border-gray-200 dark:border-gray-700 min-w-40 whitespace-nowrap">Timestamp</th>
-                          <th className="text-center px-4 py-3 font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider border border-gray-200 dark:border-gray-700 whitespace-nowrap bg-gray-50 dark:bg-gray-800/50">Correct</th>
-                          <th className="text-center px-4 py-3 font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider border border-gray-200 dark:border-gray-700 whitespace-nowrap bg-gray-50 dark:bg-gray-800/50">Wrong</th>
                           {form?.sections?.map((section: Section) => (
                             selectedResponsesSectionIds.includes(section.id) && (
                               section.questions?.map((q: any) => {
@@ -3819,8 +3770,6 @@ export default function FormAnalyticsDashboard() {
                           <td className="px-3 py-3 border border-gray-200 dark:border-gray-700 bg-amber-50/50 dark:bg-amber-900/10"></td>
                           <td className="px-6 py-3 border border-gray-200 dark:border-gray-700 sticky left-12 z-20 bg-amber-50 dark:bg-amber-900/20 font-bold text-amber-800 dark:text-amber-200 text-xs uppercase">Correct Answer</td>
                           <td className="px-6 py-3 border border-gray-200 dark:border-gray-700 bg-amber-50/50 dark:bg-amber-900/10"></td>
-                          <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 bg-amber-50/50 dark:bg-amber-900/10"></td>
-                          <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 bg-amber-50/50 dark:bg-amber-900/10"></td>
                           {form?.sections?.map((section: Section) => (
                             selectedResponsesSectionIds.includes(section.id) && (
                               section.questions?.map((q: any) => {
@@ -3919,32 +3868,6 @@ export default function FormAnalyticsDashboard() {
                               </td>
                               <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400 font-medium border border-gray-200 dark:border-gray-700 min-w-40 whitespace-nowrap">
                                 {getResponseTimestamp(response) ? new Date(getResponseTimestamp(response)!).toLocaleString() : "-"}
-                              </td>
-                              <td className="px-6 py-3 text-sm text-center font-bold text-green-600 dark:text-green-400 border border-gray-200 dark:border-gray-700">
-                                {(() => {
-                                  const { correct } = calculateScores(response);
-                                  const total = quizQuestions.length;
-                                  const percentage = total > 0 ? ((correct / total) * 100).toFixed(1) : "0.0";
-                                  return (
-                                    <div className="flex flex-col items-center">
-                                      <span>{correct}</span>
-                                      <span className="text-[10px] font-medium text-green-500 opacity-80">{percentage}%</span>
-                                    </div>
-                                  );
-                                })()}
-                              </td>
-                              <td className="px-6 py-3 text-sm text-center font-bold text-red-600 dark:text-red-400 border border-gray-200 dark:border-gray-700">
-                                {(() => {
-                                  const { wrong } = calculateScores(response);
-                                  const total = quizQuestions.length;
-                                  const percentage = total > 0 ? ((wrong / total) * 100).toFixed(1) : "0.0";
-                                  return (
-                                    <div className="flex flex-col items-center">
-                                      <span>{wrong}</span>
-                                      <span className="text-[10px] font-medium text-red-500 opacity-80">{percentage}%</span>
-                                    </div>
-                                  );
-                                })()}
                               </td>
                               {form?.sections?.map((section: Section) => (
                                 selectedResponsesSectionIds.includes(section.id) && (
@@ -4636,35 +4559,37 @@ export default function FormAnalyticsDashboard() {
                         </div>
 
                         <div className="p-4 space-y-3 flex-1">
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded border border-indigo-200 dark:border-indigo-700 text-center">
-                              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 uppercase">Sections</p>
-                              <p className="text-xl font-bold text-indigo-900 dark:text-indigo-300">{filteredSectionStats.length}</p>
+                          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 border border-gray-100 dark:border-gray-700">
+                            <div className="text-center flex-1">
+                              <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest leading-none mb-1">Secs</p>
+                              <p className="text-lg font-black text-indigo-900 dark:text-indigo-300 leading-none">{filteredSectionStats.length}</p>
                             </div>
-                            <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-700 text-center">
-                              <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase">Rate</p>
-                              <p className="text-xl font-bold text-green-900 dark:text-green-300">{responseRate}%</p>
+                            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                            <div className="text-center flex-1">
+                              <p className="text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-widest leading-none mb-1">Rate</p>
+                              <p className="text-lg font-black text-green-900 dark:text-green-300 leading-none">{responseRate}%</p>
                             </div>
-                            <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded border border-purple-200 dark:border-purple-700 text-center">
-                              <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase">Questions</p>
-                              <p className="text-xl font-bold text-purple-900 dark:text-purple-300">{totalQuestions}</p>
+                            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                            <div className="text-center flex-1">
+                              <p className="text-[10px] font-bold text-purple-700 dark:text-purple-400 uppercase tracking-widest leading-none mb-1">Qs</p>
+                              <p className="text-lg font-black text-purple-900 dark:text-purple-300 leading-none">{totalQuestions}</p>
                             </div>
                           </div>
 
                           <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                            <p className="text-xs font-semibold text-gray-900 dark:text-white mb-2 text-center">Distribution</p>
-                            <div className="space-y-1">
-                              <div className="text-center p-2 bg-green-100/60 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-700">
-                                <p className="text-xs font-semibold text-green-700 dark:text-green-400">Yes</p>
-                                <p className="text-sm font-bold text-green-800 dark:text-green-300">{totalYes} ({yesPercent}%)</p>
+                            <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-2 text-center uppercase tracking-widest">Distribution</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="text-center py-1.5 px-1 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-700 flex flex-col justify-center">
+                                <p className="text-[10px] font-semibold text-green-700 dark:text-green-400 leading-none mb-1">YES</p>
+                                <p className="text-xs font-bold text-green-900 dark:text-green-300 leading-none">{totalYes}</p>
                               </div>
-                              <div className="text-center p-2 bg-red-100/60 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-700">
-                                <p className="text-xs font-semibold text-red-700 dark:text-red-400">No</p>
-                                <p className="text-sm font-bold text-red-800 dark:text-red-300">{totalNo} ({noPercent}%)</p>
+                              <div className="text-center py-1.5 px-1 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-700 flex flex-col justify-center">
+                                <p className="text-[10px] font-semibold text-red-700 dark:text-red-400 leading-none mb-1">NO</p>
+                                <p className="text-xs font-bold text-red-900 dark:text-red-300 leading-none">{totalNo}</p>
                               </div>
-                              <div className="text-center p-2 bg-yellow-100/60 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-700">
-                                <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">N/A</p>
-                                <p className="text-sm font-bold text-yellow-800 dark:text-yellow-300">{totalNA} ({naPercent}%)</p>
+                              <div className="text-center py-1.5 px-1 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-700 flex flex-col justify-center">
+                                <p className="text-[10px] font-semibold text-yellow-700 dark:text-yellow-400 leading-none mb-1">N/A</p>
+                                <p className="text-xs font-bold text-yellow-900 dark:text-yellow-300 leading-none">{totalNA}</p>
                               </div>
                             </div>
                           </div>

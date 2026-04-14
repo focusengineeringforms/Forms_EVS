@@ -4,24 +4,25 @@ A comprehensive, enterprise-grade form management solution built with the MERN s
 
 ## � Live Deployments
 
-- **Frontend Application**: [https://prismatic-puffpuff-3f5237.netlify.app](https://prismatic-puffpuff-3f5237.netlify.app)
-- **Backend API Base URL**: [https://formsnew-production.up.railway.app/api](https://formsnew-production.up.railway.app/api)
+- **Customer Facing Forms**: [https://forms.focusengineeringapp.com](https://forms.focusengineeringapp.com)
+- **Admin Panel**: [https://formsadmin.netlify.app](https://formsadmin.netlify.app)
+- **Backend API**: [https://forms-backend-1-9ate.onrender.com/api](https://forms-backend-1-9ate.onrender.com/api)
 
 ## �🚀 Project Structure
 
 The project is organized into two main directories:
 
-- **`backend/`**: Node.js/Express REST API handling business logic, database interactions, and external services.
-- **`frontend/`**: React application (Vite) for the user interface, including the form builder, dashboard, and public form views.
+- **`backend_EVS/`**: Node.js/Express REST API (Render).
+- **`customer-module_EVS/`**: Premium, mobile-optimized form filler for end-users (Cloudflare Pages).
+- **`frontend_EVS/`**: Admin dashboard for form building and analytics (Netlify).
 
 ## ✨ Key Features
 
 ### Core Functionality
-- **Dynamic Form Builder**: Create complex forms with various input types, validation, and logic.
-- **Response Management**: Collect, view, and export form responses.
-- **User Management**: Comprehensive user administration with roles and permissions.
-- **Analytics Dashboard**: Visual insights into form performance and response trends.
-- **Invite System**: Send form invites via Email, SMS, and WhatsApp with tracking.
+- **NPS Optimized UI**: "Fit-to-Screen" mobile experience with no vertical or horizontal scrolling.
+- **Branded White Theme**: Permanent light-mode UI for a premium, professional feel.
+- **Dynamic Form Builder**: Create complex forms with various input types and logic.
+- **Multi-Channel Invites**: Send via Email, SMS, and WhatsApp with real-time tracking.
 
 ### Advanced Integrations
 - **Authentication**: Secure JWT-based authentication.
@@ -54,17 +55,23 @@ The project is organized into two main directories:
 
 ## ⚡ QUICK START: RUN THE PROJECT
 
-To start the full system, run these commands in TWO separate terminals:
+To start the full system, run these commands in THREE separate terminals:
 
 **Terminal 1 (Backend - API & WhatsApp):**
 ```bash
-cd backend
+cd backend_EVS
 npm run dev
 ```
 
-**Terminal 2 (Frontend - Admin Panel):**
+**Terminal 2 (Admin Panel):**
 ```bash
-cd frontend
+cd frontend_EVS
+npm run dev
+```
+ 
+**Terminal 3 (Customer Module):**
+```bash
+cd customer-module_EVS
 npm run dev
 ```
 
@@ -124,32 +131,40 @@ docker-compose up -d --build
 2. **Install Dependencies**:
    ```bash
    # Install backend dependencies
-   cd backend
+   cd backend_EVS
    npm install
 
-   # Install frontend dependencies
-   cd ../frontend
+   # Install admin dependencies
+   cd ../frontend_EVS
+   npm install
+ 
+   # Install customer module dependencies
+   cd ../customer-module_EVS
    npm install
    ```
 
 3. **Configure Environment**:
-   - Create `backend/.env` with required variables (see configuration section below)
+   - Create `backend_EVS/.env` with required variables (see configuration section below)
    - Update MongoDB URI, SMTP credentials, and other services
 
 4. **Start the Servers**:
    ```bash
    # Terminal 1 - Backend
-   cd backend
+   cd backend_EVS
    npm run dev
 
-   # Terminal 2 - Frontend  
-   cd frontend
+   # Terminal 2 - Admin Panel  
+   cd frontend_EVS
+   npm run dev
+ 
+   # Terminal 3 - Customer Module
+   cd customer-module_EVS
    npm run dev
    ```
 
 5. **Access the Application**:
    - **Frontend**: http://localhost:5173
-   - **Backend API**: http://localhost:5000
+   - **Backend API**: http://localhost:5001
 
 ---
 
@@ -184,7 +199,7 @@ Create a `.env` file in the `backend/` directory with these variables:
 
 ```env
 # Server
-PORT=5000
+PORT=5001
 NODE_ENV=development
 
 # Database
@@ -484,25 +499,42 @@ npm test
 
 ### Frontend Tests
 ```bash
-cd frontend
+cd frontend_EVS
 npm test
 ```
 
 ### Test SMS Functionality
 ```bash
-cd backend
+cd backend_EVS
 node scripts/test-sms.js
 ```
 
 ### Test Email Functionality
 ```bash
-cd backend
+cd backend_EVS
 node scripts/test-email.js
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## 🔧 Troubleshooting & Production Notes
+ 
+### 🌐 CORS & Production Access
+If users see "Failed to load form" or CORS errors in the console:
+1. Ensure the **Render Environment Variable** `FRONTEND_URL` includes the full protocol.
+   - ✅ Correct: `https://forms.focusengineeringapp.com`
+   - ❌ Incorrect: `forms.focusengineeringapp.com`
+2. Backend re-deploys automatically when environment variables change. Wait for "Deploy Live".
+ 
+### 🗄️ Database Mismatches
+The project uses two different MongoDB Atlas clusters. Ensure your `.env` matches the correct one for the data you need:
+- **Render Cluster**: `8im0otd.mongodb.net` (Used for production data).
+- **Legacy Cluster**: `8ia0std.mongodb.net`.
+ 
+### 🔄 Cold Starts
+On the Render Free Tier, the backend will "spin down" after inactivity.
+- The user will see a branded **"Retry Connection"** screen.
+- Wait ~60 seconds for the server to wake up before clicking retry.
 
 ### MongoDB Connection Issues
 - Verify MongoDB is running: `mongod --version`
@@ -530,8 +562,8 @@ node scripts/test-email.js
 ### Docker Issues
 ```bash
 # View logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
+docker-compose logs -f backend_EVS
+docker-compose logs -f frontend_EVS
 
 # Restart services
 docker-compose restart
@@ -547,7 +579,7 @@ docker-compose up -d --build
 
 ```
 forms_new/
-├── backend/
+├── backend_EVS/
 │   ├── controllers/      # Request handlers
 │   ├── models/          # MongoDB schemas
 │   ├── routes/          # API routes
@@ -557,7 +589,7 @@ forms_new/
 │   ├── .env            # Environment variables
 │   └── server.js       # Entry point
 │
-├── frontend/
+├── frontend_EVS/
 │   ├── src/
 │   │   ├── components/  # React components
 │   │   ├── api/        # API client
@@ -565,6 +597,8 @@ forms_new/
 │   │   ├── pages/      # Page components
 │   │   └── utils/      # Utilities
 │   └── vite.config.ts  # Vite configuration
+│
+├── customer-module_EVS/  # end-user UI
 │
 ├── docker-compose.yml   # Docker development
 ├── Dockerfile          # Docker image

@@ -24,6 +24,7 @@ const CHART_SUPPORTED_TYPES = new Set([
   "search-select",
   "slider-feedback",
   "emoji-star-feedback",
+  "scale",
 ]);
 
 ChartJS.register(
@@ -548,6 +549,7 @@ export default function ResponseQuestion({
           ),
           borderColor: "rgba(255, 255, 255, 0.1)",
           borderWidth: 1,
+          hoverOffset: 12,
         },
       ],
     };
@@ -695,6 +697,131 @@ export default function ResponseQuestion({
       return renderFeedbackQuestionChart(q);
     }
 
+    if (q.type === "scale") {
+      let bucket0_4 = 0;
+      let bucket5_8 = 0;
+      let bucket9_10 = 0;
+
+      filteredResponses.forEach((r) => {
+        const valStr = r.answers?.[q.id];
+        if (valStr !== undefined && valStr !== null && valStr !== "") {
+          const val = Number(valStr);
+          if (!isNaN(val)) {
+            if (val >= 0 && val <= 4) bucket0_4++;
+            else if (val >= 5 && val <= 8) bucket5_8++;
+            else if (val >= 9 && val <= 10) bucket9_10++;
+          }
+        }
+      });
+
+      const labels = ["0-4 (Detractors)", "5-8 (Passives)", "9-10 (Promoters)"];
+      const dataValues = [bucket0_4, bucket5_8, bucket9_10];
+      const totalResponses = dataValues.reduce((a, b) => a + b, 0);
+
+      if (totalResponses === 0) {
+        return (
+          <div className="h-[200px] flex items-center justify-center">
+            <p className="text-sm text-gray-500">No numeric responses available</p>
+          </div>
+        );
+      }
+
+      const data = {
+        labels: labels,
+        datasets: [
+          {
+            data: dataValues,
+            backgroundColor: [
+              "#ef4444", // red-500
+              "#eab308", // yellow-500
+              "#22c55e", // green-500
+            ],
+            borderColor: "rgba(255, 255, 255, 0.1)",
+            borderWidth: 1,
+            hoverOffset: 12,
+          },
+        ],
+      };
+
+      const chartType = chartPreferences[q.id] || "pie";
+
+      const baseOptions = {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom" as const,
+            labels: {
+              padding: 15,
+              font: { size: 11 },
+              color: "rgb(107, 114, 128)",
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                const value = context.raw;
+                const percentage = totalResponses > 0 ? ((value / totalResponses) * 100).toFixed(1) : "0";
+                return `${value} responses (${percentage}%)`;
+              },
+            },
+          },
+        },
+      };
+
+      const options = chartType === "pie" ? {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          datalabels: {
+            formatter: (value: number) => {
+              if (value === 0) return "";
+              const percentage = totalResponses > 0 ? ((value / totalResponses) * 100).toFixed(1) : "0";
+              return `${percentage}%`;
+            },
+            color: "white",
+            font: { size: 10 },
+          },
+        },
+      } : {
+        ...baseOptions,
+        indexAxis: "y" as const,
+        plugins: {
+          ...baseOptions.plugins,
+          legend: { display: false },
+          datalabels: {
+            anchor: "center" as const,
+            align: "center" as const,
+            formatter: (value: number) => {
+              if (value === 0) return "";
+              const percentage = totalResponses > 0 ? ((value / totalResponses) * 100).toFixed(1) : "0";
+              return `${percentage}%`;
+            },
+            color: "white",
+            font: { size: 10 },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              callback: (val: any) => Number.isInteger(val) ? val : "",
+            },
+          },
+        },
+      };
+
+      return (
+        <div className="h-[200px]">
+          {chartType === "pie" ? (
+            <Pie data={data} options={options} />
+          ) : (
+            <Bar data={data} options={options} />
+          )}
+        </div>
+      );
+    }
+
     // Regular chart rendering for other questions
     if (!q.options || !CHART_SUPPORTED_TYPES.has(q.type)) return null;
 
@@ -713,6 +840,7 @@ export default function ResponseQuestion({
           ),
           borderColor: "rgba(255, 255, 255, 0.1)",
           borderWidth: 1,
+          hoverOffset: 12,
         },
       ],
     };
@@ -862,13 +990,21 @@ export default function ResponseQuestion({
   };
 
   const renderTextQuestionSummary = (q: any) => {
-    const responses = getQuestionResponses(q.id);
-    const responseCount = responses.length;
+    let respondedUsers = 0;
+    filteredResponses.forEach((r) => {
+      const val = r.answers?.[q.id];
+      if (val !== undefined && val !== null && String(val).trim() !== "") {
+        respondedUsers++;
+      }
+    });
+
+    const totalUsers = filteredResponses.length;
+    const percentage = totalUsers > 0 ? ((respondedUsers / totalUsers) * 100).toFixed(1) : "0.0";
 
     return (
       <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
         <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
-          Total Responses: {responseCount}
+          Answered by {respondedUsers} of {totalUsers} respondents ({percentage}%)
         </span>
       </div>
     );
@@ -1209,12 +1345,12 @@ export default function ResponseQuestion({
                       // For Feedback Section questions, check if they are feedback types
                       // For other sections, check regular chart support
                       const shouldRenderChart = isThisFeedbackSection
-                        ? ["slider-feedback", "emoji-star-feedback"].includes(
+                        ? ["slider-feedback", "emoji-star-feedback", "scale"].includes(
                             q.type
                           )
-                        : Array.isArray(q.options) &&
+                        : (Array.isArray(q.options) &&
                           q.options.length > 0 &&
-                          CHART_SUPPORTED_TYPES.has(q.type);
+                          CHART_SUPPORTED_TYPES.has(q.type)) || q.type === "scale";
 
                       const responses = getQuestionResponses(q.id);
                       const responseCount = responses.length;
@@ -1320,7 +1456,7 @@ export default function ResponseQuestion({
                               <span className="text-sm text-gray-500 dark:text-gray-400">
                                 {responseCount} responses
                               </span>
-                              {shouldRenderChart && (
+                              {shouldRenderChart && !["scale", "slider-feedback", "emoji-star-feedback"].includes(q.type) && (
                                 <ChartTypeSelector
                                   value={chartPreferences[q.id] || "bar"}
                                   onChange={(type) =>
@@ -1376,9 +1512,9 @@ export default function ResponseQuestion({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getMainQuestions(allQuestions).map((q) => {
               const shouldRenderChart =
-                Array.isArray(q.options) &&
+                (Array.isArray(q.options) &&
                 q.options.length > 0 &&
-                CHART_SUPPORTED_TYPES.has(q.type);
+                CHART_SUPPORTED_TYPES.has(q.type)) || q.type === "scale";
               const responses = getQuestionResponses(q.id);
               const responseCount = responses.length;
               const stats = getCorrectWrongStats(q);
@@ -1467,7 +1603,7 @@ export default function ResponseQuestion({
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         {responseCount} responses
                       </span>
-                      {shouldRenderChart && (
+                      {shouldRenderChart && !["scale", "slider-feedback", "emoji-star-feedback"].includes(q.type) && (
                         <ChartTypeSelector
                           value={chartPreferences[q.id] || "bar"}
                           onChange={(type) => handleChartTypeChange(q.id, type)}

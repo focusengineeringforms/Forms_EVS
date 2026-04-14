@@ -24,7 +24,7 @@ import parameterRoutes from "./routes/parameterRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { handleUploadError } from "./middleware/upload.js";
 import { initializeSocket } from "./socket/socketHandler.js";
-import pdfService from './services/pdfService.js';  // Add this for cleanup
+import pdfService from './services/pdfService.js';
 import pdfRoutes from './routes/pdfRoutes.js'; 
 import githubWebhookRoutes from "./routes/githubWebhook.js";
 import formInviteRoutes from './routes/formInviteRoutes.js';
@@ -108,8 +108,6 @@ app.use(express.urlencoded({ extended: true, limit: "200mb" }));
 
 app.use('/api/upload', uploadRoutes);
 
-
-
 // Health check route
 app.get("/", (req, res) => {
   res.json({
@@ -119,8 +117,6 @@ app.get("/", (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-// Files are now served through GridFS via /api/files/:id endpoint
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
@@ -145,13 +141,13 @@ app.use('/api/fix', fixRoutes);
 
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received. Cleaning up...');
-  await pdfService.cleanup();  // ✅ FIXED: lowercase
+  await pdfService.cleanup();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received. Cleaning up...');
-  await pdfService.cleanup();  // ✅ FIXED: lowercase
+  await pdfService.cleanup();
   process.exit(0);
 });
 
@@ -268,7 +264,7 @@ app.use(handleUploadError);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5001;
 
 // Create HTTP server
 const httpServer = createServer(app);

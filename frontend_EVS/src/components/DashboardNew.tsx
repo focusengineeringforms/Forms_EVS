@@ -565,7 +565,7 @@ export default function DashboardNew() {
             return (
               <div
                 key={form._id}
-                className="flex-shrink-0 w-72 h-[36rem] bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-600 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col overflow-hidden"
+                className="flex-shrink-0 w-72 h-auto bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-600 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col overflow-hidden"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg group-hover:scale-110 transition-transform">
@@ -590,26 +590,18 @@ export default function DashboardNew() {
                   {form.description || "No description provided"}
                 </p>
 
-                <div className="flex items-center justify-between py-2 border-b border-gray-300 dark:border-gray-500">
+                <div className="flex items-center justify-between py-2 border-b border-gray-300 dark:border-gray-500 mb-2">
                   <div>
-                    <p className="text-gray-600 dark:text-gray-400 text-xs">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
                       Total Responses
                     </p>
-                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400 truncate">
+                    <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">
                       {form.responseCount || 0}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs">
-                      YES
-                    </p>
-                    <p className="text-lg font-bold" style={{ color: "#1e3a8a" }}>
-                      {promoterPercentage}%
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-2 flex-1 flex flex-col items-center justify-center min-h-0">
+                <div className="mt-2 flex flex-col items-center justify-center min-h-0">
                   {stats.total > 0 ? (
                     <>
                       <div className="w-full h-full flex items-center justify-center py-2" style={{ maxHeight: "160px" }}>
@@ -672,13 +664,7 @@ export default function DashboardNew() {
                         </div>
                       </div>
                     </>
-                  ) : (
-                    <div className="text-center py-2">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        No responses
-                      </p>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
 
                 <button

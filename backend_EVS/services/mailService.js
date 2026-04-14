@@ -79,11 +79,9 @@ class MailService {
         console.error('❌ MailerSend API failed:', errorDetail);
         console.error('   Full error:', JSON.stringify(apiError?.body || apiError, null, 2));
 
-        // In production (Render), SMTP is BLOCKED — do NOT fall through
-        if (process.env.NODE_ENV === 'production') {
-          return { success: false, error: `MailerSend error: ${errorDetail}` };
-        }
-        // In dev, fall through to SMTP below
+        // If MAILERSEND_API_KEY is configured, we DO NOT fall through to SMTP.
+        // This avoids 20s connection timeouts when MailerSend fails but SMTP is blocked.
+        return { success: false, error: `MailerSend error: ${errorDetail}` };
       }
     }
 

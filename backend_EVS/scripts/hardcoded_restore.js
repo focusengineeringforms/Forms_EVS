@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb';
 
 async function main() {
   // HARDCODED URI for verification
-  const uri = 'mongodb+srv://focushub360db:Priya%4040123@focusforms.8im0otd.mongodb.net/focushub?retryWrites=true&w=majority';
+  const uri = 'mongodb+srv://focushub360db:Priya%40123@focusforms.8im0otd.mongodb.net/focushub?retryWrites=true&w=majority';
   console.log('Connecting to Atlas with hardcoded URI...');
   const client = new MongoClient(uri);
 

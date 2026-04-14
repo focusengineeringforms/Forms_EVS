@@ -51,9 +51,9 @@ export default function ScaleQuestion({
     <div className={`space-y-4 py-2 w-full max-w-4xl mx-auto transition-all duration-500`}>
       
       {/* Circular Buttons Container */}
-      <div className="relative overflow-visible">
+      <div className={`relative overflow-visible ${isLargeScale ? 'px-2 sm:px-4' : ''}`}>
         
-        <div className={`flex items-center justify-center ${isLargeScale ? 'gap-0.5 sm:gap-1.5 md:gap-3' : 'gap-4 sm:gap-14'} px-1 py-4 no-scrollbar flex-nowrap overflow-x-auto overflow-y-visible`}>
+        <div className={`flex items-center ${isLargeScale ? 'justify-between w-full' : 'justify-center gap-4 sm:gap-14'} py-4 no-scrollbar flex-nowrap overflow-x-auto overflow-y-visible`}>
 
           {options.map((val) => {
             const isSelected = value === val.toString();
@@ -85,7 +85,7 @@ export default function ScaleQuestion({
                 disabled={readOnly}
                 className={`nps-circle shrink-0 relative
                   ${isLargeScale 
-                    ? "w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 text-[10px] sm:text-base md:text-xl" 
+                    ? "w-[26px] h-[26px] min-[380px]:w-8 min-[380px]:h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 text-[10px] sm:text-base md:text-xl" 
                     : "w-10 h-10 sm:w-13 sm:h-13 md:w-16 md:h-16 text-xs sm:text-xl md:text-2xl"} 
                   ${getButtonStyles()}
                   ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} 
