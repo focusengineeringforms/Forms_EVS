@@ -83,12 +83,12 @@ export default function ScaleQuestion({
                   onChange(value === stringVal ? "" : stringVal);
                 }}
                 disabled={readOnly}
-                className={`nps-circle shrink-0 relative
+                className={`shrink-0 relative rounded-full flex items-center justify-center font-bold transition-all duration-200
                   ${isLargeScale 
                     ? "w-[26px] h-[26px] min-[380px]:w-8 min-[380px]:h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 text-[10px] sm:text-base md:text-xl" 
-                    : "w-10 h-10 sm:w-13 sm:h-13 md:w-16 md:h-16 text-xs sm:text-xl md:text-2xl"} 
-                  ${getButtonStyles()}
-                  ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} 
+                    : "w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 lg:w-16 lg:h-16 text-xs sm:text-xl md:text-2xl"} 
+                  ${getButtonStyles()} border-2
+                  ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md hover:scale-105 active:scale-95'} 
                   z-10
                 `}
                 style={{ 
