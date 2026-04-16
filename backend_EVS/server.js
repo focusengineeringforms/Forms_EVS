@@ -264,7 +264,7 @@ app.use(handleUploadError);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = 5001;
+const PORT = process.env.PORT || 5003;
 
 // Create HTTP server
 const httpServer = createServer(app);
