@@ -45,8 +45,8 @@ app.timeout = requestTimeout;
 const allowedOrigins = [
   "https://servicerequests.netlify.app",
   "https://formsadmin.netlify.app",
-  "https://formsuperadmin.focusengineeringapp.com",
-  "https://forms.focusengineeringapp.com",
+  "https://evs-nps.focusengineeringapp.com",
+  "https://evs-customer.focusengineeringapp.com",
   /https:\/\/.*\.pages\.dev$/, // Cloudflare Pages wildcard
   /https:\/\/.*\.focusengineeringapp\.com$/, // Focus Engineering wildcard subdomains
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [])
