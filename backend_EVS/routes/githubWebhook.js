@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { exec } from "child_process";
 
 const router = express.Router();
-const GITHUB_SECRET = process.env.GITHUB_SECRET || "focus123";
+const GITHUB_SECRET = process.env.GITHUB_SECRET || "focusforms123";
 
 router.post("/", (req, res) => {
   const signature = req.headers["x-hub-signature-256"];
@@ -23,7 +23,7 @@ router.post("/", (req, res) => {
   res.status(200).send({ success: true, message: "Deployment triggered" });
 
   // Async deploy
-  exec("cd /var/www/forms-backend && git pull && npm install --production && pm2 restart forms-backend",
+  exec("cd /var/www/backend_EVS && git pull && npm install --production && pm2 restart backend_EVS",
        (err, stdout, stderr) => {
     if (err) return console.error("❌ Deployment failed:", err);
     console.log("✅ Deployment complete:\n", stdout);
