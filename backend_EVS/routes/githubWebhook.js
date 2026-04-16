@@ -25,15 +25,12 @@ router.post("/", (req, res) => {
   // Async deploy
   //exec("cd /var/www/Forms_EVS/backend_EVS && git fetch origin && git reset --hard origin/main && npm install --production && pm2 restart backend_EVS",
   exec(`
-    cd /var/www/Forms_EVS/backend_EVS || exit
-    git fetch origin
-    echo "BEFORE RESET:"
-    git log -1
-    git reset --hard origin/main
-    echo "AFTER RESET:"
-    git log -1
-    npm install --production
-    pm2 restart backend_EVS
+    pm2 stop backend_EVS &&
+cd /var/www/Forms_EVS/backend_EVS &&
+git fetch origin &&
+git reset --hard origin/main &&
+npm install --production &&
+pm2 restart backend_EVS
   `, (err, stdout, stderr) => {
     if (err) return console.error("❌ Deployment failed:", err);
     console.log("✅ Deployment complete:\n", stdout);
