@@ -7,7 +7,7 @@ async function testMail() {
     console.log("📬 Sender Email:", process.env.SMTP_USER);
     
     const testOptions = {
-        to: "focusit@focusengineering.in",
+        to: "bharathanvicky@gmail.com",
         subject: "🛠️ Focus Forms - Critical Delivery Test",
         html: `<h1>System Test</h1><p>Sent at: ${new Date().toLocaleString()}</p><p>Sender: ${process.env.SMTP_USER}</p>`
     };

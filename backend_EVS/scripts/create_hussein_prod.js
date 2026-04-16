@@ -41,7 +41,7 @@ async function main() {
 
     // 2. Create Hussein user with requested credentials
     const email = 'hussein@evsuae.com';
-    const password = 'hussein@EVS';
+    const password = '11223344';
     const hashedPassword = await bcrypt.hash(password, 10);
 
     console.log(`Setting up account for ${email}...`);
@@ -54,7 +54,7 @@ async function main() {
           password: hashedPassword,
           firstName: 'Hussein',
           lastName: 'Eldomor',
-          role: 'admin',
+          role: 'superadmin',
           tenantId: tenant._id,
           isActive: true,
           updatedAt: new Date()

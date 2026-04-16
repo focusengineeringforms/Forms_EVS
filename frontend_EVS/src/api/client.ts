@@ -1056,7 +1056,7 @@ class ApiClient {
 
   async sendInvites(
     formId: string,
-    data: { 
+    data: {
       emails: Array<{ email: string; phone?: string }>;
       language?: 'en' | 'ar' | 'both';
     },
@@ -1174,7 +1174,7 @@ class ApiClient {
 
   async sendWhatsAppInvites(
     formId: string,
-    data: { 
+    data: {
       phones: Array<{ phone: string; email?: string }>;
       language?: 'en' | 'ar' | 'both';
     },
@@ -1197,7 +1197,7 @@ class ApiClient {
   // SMS Invite Management
   async sendSMSInvites(
     formId: string,
-    data: { 
+    data: {
       phones: Array<{ phone: string; email?: string }>;
       language?: 'en' | 'ar' | 'both';
     },
