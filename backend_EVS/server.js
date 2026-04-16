@@ -45,6 +45,8 @@ app.timeout = requestTimeout;
 const allowedOrigins = [
   "https://servicerequests.netlify.app",
   "https://formsadmin.netlify.app",
+  "https://formsuperadmin.focusengineeringapp.com",
+  "https://forms.focusengineeringapp.com",
   "https://evs-nps.focusengineeringapp.com",
   "https://evs-customer.focusengineeringapp.com",
   /https:\/\/.*\.pages\.dev$/, // Cloudflare Pages wildcard
@@ -264,7 +266,7 @@ app.use(handleUploadError);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT || 5001;
 
 // Create HTTP server
 const httpServer = createServer(app);

@@ -28,11 +28,8 @@ RUN npm ci --only=production
 # Copy application code
 COPY . .
 
-# Expose port
-EXPOSE 5000
-
-# Set environment to production
-ENV NODE_ENV=production
+# Expose port (Render dynamically assigns PORT env var)
+EXPOSE 10000
 
 # Start the server
 CMD ["node", "server.js"]
