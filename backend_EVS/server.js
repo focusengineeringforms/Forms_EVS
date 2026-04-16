@@ -112,7 +112,7 @@ app.use('/api/upload', uploadRoutes);
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Little Flower School Backend API is running 🚀",
+    message: "EVS-NPS FORMS Backend API is running 🚀",
     version: "1.0.0",
     timestamp: new Date().toISOString()
   });
@@ -158,7 +158,7 @@ app.use("/api/github-webhook", githubWebhookRoutes);
 app.get("/api", (req, res) => {
   res.json({
     success: true,
-    message: "Little Flower School API - Complete Form Management System",
+    message: "EVS-NPS FORMS API - Complete Form Management System",
     version: "1.0.0",
     endpoints: {
       auth: {
