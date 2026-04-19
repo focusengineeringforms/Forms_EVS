@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { User, Lock, Building, Mail, UserPlus, Eye, EyeOff, Globe } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLogo } from "../../context/LogoContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useNotification } from "../../context/NotificationContext";
 
 export default function SignupPage() {
   const { signup, error: authError, loading: authLoading, isAuthenticated } = useAuth();
+  const { logo } = useLogo();
   const { showSuccess } = useNotification();
   const navigate = useNavigate();
 
@@ -46,6 +48,11 @@ export default function SignupPage() {
       
       {/* Left Side: Welcome Panel */}
       <div className="w-full md:w-1/3 bg-[#1e3a8a] text-white p-8 md:p-10 flex flex-col justify-center items-center text-center relative z-20 rounded-b-[3rem] md:rounded-b-none md:rounded-r-[10rem]">
+        {/* Logo at top left */}
+        <div className="absolute top-6 left-6 md:top-10 md:left-10">
+          <img src={logo} alt="Logo" className="h-10 md:h-12 w-auto object-contain" />
+        </div>
+
         <div className="max-w-md animate-in fade-in slide-in-from-left-8 duration-700">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 font-sans">Join Us!</h1>
           <p className="text-blue-100 text-base mb-4 font-light font-sans">

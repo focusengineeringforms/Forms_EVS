@@ -155,11 +155,12 @@ export default function Header() {
   return (
     <>
       <header
-        className="fixed top-0 right-0 left-0 h-16 bg-white dark:bg-gray-900 border-b border-neutral-200 dark:border-gray-700 z-30 transition-all duration-300"
+        className="fixed -top-[2px] right-0 left-0 h-[66px] pt-[2px] bg-white dark:bg-gray-900 border-b border-neutral-200 dark:border-gray-700 z-30 transition-all duration-300"
+        style={{ willChange: 'transform' }}
       >
         <div className="flex items-center justify-between h-full px-6">
           {/* Left side - logo */}
-          <div className="flex items-center min-w-[200px]">
+          <div className="flex items-center min-w-[260px]">
             {/* Mobile menu button */}
             <button
               onClick={toggleSidebar}
@@ -176,7 +177,7 @@ export default function Header() {
               <img
                 src={logo}
                 alt="Logo"
-                className="h-8 w-auto object-contain max-w-[150px]"
+                className="h-[60px] w-auto object-contain max-w-[250px]"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}

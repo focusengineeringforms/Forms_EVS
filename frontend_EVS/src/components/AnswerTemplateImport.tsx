@@ -27,6 +27,7 @@ import type { Question } from "../types";
 import ImagePreviewGrid from "./ImagePreviewGrid";
 import SubmissionProgressModal from "./SubmissionProgressModal";
 import { io } from "socket.io-client";
+import ModalPortal from "./common/ModalPortal";
 
 interface AnswerTemplateImportProps {
   isOpen: boolean;
@@ -293,155 +294,109 @@ export default function AnswerTemplateImport({
     fileInputRef.current?.click();
   };
 
- const getImageAnswers = () => {
-  if (!selectedForm || !parsedAnswers) {
-    return [];
-  }
+  const getImageAnswers = () => {
+    if (!selectedForm || !parsedAnswers) {
+      return [];
+    }
 
-  const imageAnswers: Array<{
-    questionId: string;
-    questionText: string;
-    url: string;
-    isConverted: boolean;
-  }> = [];
+    const imageAnswers: Array<{
+      questionId: string;
+      questionText: string;
+      url: string;
+      isConverted: boolean;
+    }> = [];
 
-  console.log("🔍 ALL PARSED ANSWERS KEYS:", Object.keys(parsedAnswers));
-  console.log("🔍 TOTAL KEYS:", Object.keys(parsedAnswers).length);
+    // PART 1: Get ALL string values that are image URLs
+    Object.entries(parsedAnswers).forEach(([key, value]) => {
+      if (value && typeof value === 'string' && isImageUrl(value)) {
+        let questionText = "Image";
+        if (key.includes('_photo_')) {
+          const parentId = key.replace('_photo_yes', '').replace('_photo_no', '');
+          const isYes = key.includes('_yes');
+          selectedForm.sections.forEach(section => {
+            section.questions.forEach(q => {
+              if (q.id === parentId) {
+                questionText = `${q.text || "Question"} - ${isYes ? 'Yes' : 'No'} Photograph`;
+              }
+            });
+          });
+        }
+        else if (key.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          selectedForm.sections.forEach(section => {
+            section.questions.forEach(q => {
+              if (q.id === key) {
+                questionText = q.text || "Image Question";
+              }
+            });
+          });
+        }
+        else if (key.startsWith('synthetic_')) {
+          questionText = "Follow-up Photograph";
+        }
 
-  // ===========================================
-  // PART 1: Get ALL string values that are image URLs
-  // ===========================================
-  Object.entries(parsedAnswers).forEach(([key, value]) => {
-    // Check if value is a string and is an image URL
-    if (value && typeof value === 'string' && isImageUrl(value)) {
-      console.log(`✅ Found image URL in key: ${key}`);
-      
-      // Determine the question text based on the key pattern
-      let questionText = "Image";
-      
-      // Case 1: It's a direct photo key (contains _photo_)
-      if (key.includes('_photo_')) {
-        const parentId = key.replace('_photo_yes', '').replace('_photo_no', '');
-        const isYes = key.includes('_yes');
-        
-        // Find parent question
+        imageAnswers.push({
+          questionId: key,
+          questionText: questionText,
+          url: value,
+          isConverted: isCloudinaryUrl(value),
+        });
+      }
+    });
+
+    // PART 2: Check nested objects for image URLs
+    Object.entries(parsedAnswers).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && value !== null) {
+        const parentId = key.replace('synthetic_', '');
+        let parentText = "Question";
         selectedForm.sections.forEach(section => {
           section.questions.forEach(q => {
             if (q.id === parentId) {
-              questionText = `${q.text || "Question"} - ${isYes ? 'Yes' : 'No'} Photograph`;
+              parentText = q.text || "Question";
             }
           });
         });
-      }
-      // Case 2: It's a regular question ID
-      else if (key.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        // Find the question text
-        selectedForm.sections.forEach(section => {
-          section.questions.forEach(q => {
-            if (q.id === key) {
-              questionText = q.text || "Image Question";
+
+        if ((value as any)['Photograph for Yes']?.answer) {
+          const photoUrl = (value as any)['Photograph for Yes'].answer;
+          if (isImageUrl(String(photoUrl))) {
+            const exists = imageAnswers.some(img => img.url === photoUrl);
+            if (!exists) {
+              imageAnswers.push({
+                questionId: `${parentId}_photo_yes`,
+                questionText: `${parentText} - Yes Photograph`,
+                url: String(photoUrl),
+                isConverted: isCloudinaryUrl(String(photoUrl)),
+              });
             }
-          });
-        });
-      }
-      // Case 3: It's a synthetic key
-      else if (key.startsWith('synthetic_')) {
-        questionText = "Follow-up Photograph";
-      }
-
-      imageAnswers.push({
-        questionId: key,
-        questionText: questionText,
-        url: value,
-        isConverted: isCloudinaryUrl(value),
-      });
-    }
-  });
-
-  // ===========================================
-  // PART 2: Check nested objects for image URLs
-  // ===========================================
-  Object.entries(parsedAnswers).forEach(([key, value]) => {
-    if (value && typeof value === 'object' && value !== null) {
-      console.log(`🔍 Checking object: ${key}`, value);
-      
-      const parentId = key.replace('synthetic_', '');
-      
-      // Get parent question text
-      let parentText = "Question";
-      selectedForm.sections.forEach(section => {
-        section.questions.forEach(q => {
-          if (q.id === parentId) {
-            parentText = q.text || "Question";
           }
-        });
-      });
+        }
 
-      // Check for Photograph for Yes
-      if ((value as any)['Photograph for Yes']?.answer) {
-        const photoUrl = (value as any)['Photograph for Yes'].answer;
-        if (isImageUrl(String(photoUrl))) {
-          console.log(`✅ Found Photograph for Yes in ${key}`);
-          
-          // Check if we already added this URL
-          const exists = imageAnswers.some(img => img.url === photoUrl);
-          if (!exists) {
-            imageAnswers.push({
-              questionId: `${parentId}_photo_yes`,
-              questionText: `${parentText} - Yes Photograph`,
-              url: String(photoUrl),
-              isConverted: isCloudinaryUrl(String(photoUrl)),
-            });
+        if ((value as any)['Photograph for No']?.answer) {
+          const photoUrl = (value as any)['Photograph for No'].answer;
+          if (isImageUrl(String(photoUrl))) {
+            const exists = imageAnswers.some(img => img.url === photoUrl);
+            if (!exists) {
+              imageAnswers.push({
+                questionId: `${parentId}_photo_no`,
+                questionText: `${parentText} - No Photograph`,
+                url: String(photoUrl),
+                isConverted: isCloudinaryUrl(String(photoUrl)),
+              });
+            }
           }
         }
       }
+    });
 
-      // Check for Photograph for No
-      if ((value as any)['Photograph for No']?.answer) {
-        const photoUrl = (value as any)['Photograph for No'].answer;
-        if (isImageUrl(String(photoUrl))) {
-          console.log(`✅ Found Photograph for No in ${key}`);
-          
-          // Check if we already added this URL
-          const exists = imageAnswers.some(img => img.url === photoUrl);
-          if (!exists) {
-            imageAnswers.push({
-              questionId: `${parentId}_photo_no`,
-              questionText: `${parentText} - No Photograph`,
-              url: String(photoUrl),
-              isConverted: isCloudinaryUrl(String(photoUrl)),
-            });
-          }
-        }
+    const uniqueImages = new Map();
+    imageAnswers.forEach(img => {
+      if (!uniqueImages.has(img.url)) {
+        uniqueImages.set(img.url, img);
       }
-    }
-  });
+    });
 
-  // ===========================================
-  // PART 3: Remove duplicates by URL
-  // ===========================================
-  const uniqueImages = new Map();
-  imageAnswers.forEach(img => {
-    if (!uniqueImages.has(img.url)) {
-      uniqueImages.set(img.url, img);
-    } else {
-      console.log(`⚠️ Duplicate image found: ${img.url.substring(0, 50)}...`);
-    }
-  });
-
-  const result = Array.from(uniqueImages.values());
-  
-  console.log("📊 IMAGE SUMMARY:");
-  console.log(`   Total images found: ${imageAnswers.length}`);
-  console.log(`   Duplicates removed: ${imageAnswers.length - result.length}`);
-  console.log(`   Final unique images: ${result.length}`);
-  
-  result.forEach((img, i) => {
-    console.log(`   ${i + 1}. ${img.questionText}: ${img.url.substring(0, 50)}...`);
-  });
-
-  return result;
-};
+    return Array.from(uniqueImages.values());
+  };
 
   const handleFinalSubmit = async () => {
     if (!selectedForm || !finalAnswers) {
@@ -454,22 +409,16 @@ export default function AnswerTemplateImport({
     setProgressMessage("Submitting answers to backend...");
 
     try {
-      // Generate batch ID for progress tracking
       const newBatchId = `batch-${Date.now()}`;
       setBatchId(newBatchId);
-
-      // Join WebSocket room for this batch
       if (socketRef.current) {
         socketRef.current.emit("join-submission", newBatchId);
       }
-
       const formattedData = formatAnswersForSubmission(
         selectedForm,
         finalAnswers
       );
-
       const formId = selectedForm.id || selectedForm._id;
-
       const responsePayload = {
         questionId: formId,
         batchId: newBatchId,
@@ -482,19 +431,11 @@ export default function AnswerTemplateImport({
           },
         ],
       };
-
-      // Set start time for progress estimation
       (window as any).conversionStartTime = Date.now();
-
-      // Actually call the API
       const response = await apiClient.batchImportResponses(responsePayload);
-
       setProgressStatus("complete");
       setProgressMessage("✓ Answers submitted successfully!");
-
       showSuccess("Import Completed Successfully", "Success");
-
-      // Clean up and close
       setTimeout(() => {
         onSuccess?.();
         onClose();
@@ -515,64 +456,44 @@ export default function AnswerTemplateImport({
     return getImageAnswers();
   };
 
- const getConvertedImageCount = () => {
-  if (!parsedAnswers) return 0;
-  
-  let count = 0;
-  
-  // Check all string values for Cloudinary URLs
-  Object.values(parsedAnswers).forEach(val => {
-    if (typeof val === 'string' && isCloudinaryUrl(val)) {
-      count++;
-    }
-  });
-  
-  // Check nested synthetic answers
-  Object.values(parsedAnswers).forEach(val => {
-    if (typeof val === 'object' && val !== null) {
-      const photoYes = (val as any)['Photograph for Yes']?.answer;
-      if (photoYes && isCloudinaryUrl(String(photoYes))) count++;
-      
-      const photoNo = (val as any)['Photograph for No']?.answer;
-      if (photoNo && isCloudinaryUrl(String(photoNo))) count++;
-    }
-  });
-  
-  return count;
-};
+  const getConvertedImageCount = () => {
+    if (!parsedAnswers) return 0;
+    let count = 0;
+    Object.values(parsedAnswers).forEach(val => {
+      if (typeof val === 'string' && isCloudinaryUrl(val)) count++;
+    });
+    Object.values(parsedAnswers).forEach(val => {
+      if (typeof val === 'object' && val !== null) {
+        const photoYes = (val as any)['Photograph for Yes']?.answer;
+        if (photoYes && isCloudinaryUrl(String(photoYes))) count++;
+        const photoNo = (val as any)['Photograph for No']?.answer;
+        if (photoNo && isCloudinaryUrl(String(photoNo))) count++;
+      }
+    });
+    return count;
+  };
 
-const getUnconvertedImageCount = () => {
-  if (!parsedAnswers) return 0;
-  
-  let count = 0;
-  
-  // Check all string values for Google Drive URLs that aren't Cloudinary
-  Object.values(parsedAnswers).forEach(val => {
-    if (typeof val === 'string' && isGoogleDriveUrl(val) && !isCloudinaryUrl(val)) {
-      count++;
-    }
-  });
-  
-  // Check nested synthetic answers
-  Object.values(parsedAnswers).forEach(val => {
-    if (typeof val === 'object' && val !== null) {
-      const photoYes = (val as any)['Photograph for Yes']?.answer;
-      if (photoYes && isGoogleDriveUrl(String(photoYes)) && !isCloudinaryUrl(String(photoYes))) count++;
-      
-      const photoNo = (val as any)['Photograph for No']?.answer;
-      if (photoNo && isGoogleDriveUrl(String(photoNo)) && !isCloudinaryUrl(String(photoNo))) count++;
-    }
-  });
-  
-  return count;
-};
+  const getUnconvertedImageCount = () => {
+    if (!parsedAnswers) return 0;
+    let count = 0;
+    Object.values(parsedAnswers).forEach(val => {
+      if (typeof val === 'string' && isGoogleDriveUrl(val) && !isCloudinaryUrl(val)) count++;
+    });
+    Object.values(parsedAnswers).forEach(val => {
+      if (typeof val === 'object' && val !== null) {
+        const photoYes = (val as any)['Photograph for Yes']?.answer;
+        if (photoYes && isGoogleDriveUrl(String(photoYes)) && !isCloudinaryUrl(String(photoYes))) count++;
+        const photoNo = (val as any)['Photograph for No']?.answer;
+        if (photoNo && isGoogleDriveUrl(String(photoNo)) && !isCloudinaryUrl(String(photoNo))) count++;
+      }
+    });
+    return count;
+  };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <>
+    <ModalPortal>
       <SubmissionProgressModal
         isOpen={progressStatus !== "idle"}
         status={progressStatus}
@@ -582,7 +503,7 @@ const getUnconvertedImageCount = () => {
         errorMessage={progressError}
       />
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col ring-1 ring-white">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 px-8 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-lg">
@@ -767,7 +688,6 @@ const getUnconvertedImageCount = () => {
                       successfully
                     </p>
 
-                    {/* Show conversion status */}
                     {imageConversionStats &&
                       imageConversionStats.status === "completed" && (
                         <p className="text-sm text-green-600 dark:text-green-400 mt-1">
@@ -783,7 +703,6 @@ const getUnconvertedImageCount = () => {
                         </p>
                       )}
 
-                    {/* Show warning only if conversion hasn't happened yet */}
                     {!isImageConversionDone &&
                       getUnconvertedImageCount() > 0 && (
                         <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
@@ -800,85 +719,77 @@ const getUnconvertedImageCount = () => {
                     Text Answers Preview
                   </h3>
                   <div className="space-y-3">
-                    {selectedForm.sections.map((section, sectionIndex) =>
-                      section.questions.map((question) => {
-                        const answer = parsedAnswers[question.id];
-                        if (answer && !isImageUrl(String(answer))) {
-                          return (
-                            <div
-                              key={`${sectionIndex}-${question.id}`}
-                              className="text-sm pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0"
-                            >
-                              <p className="text-gray-800 dark:text-gray-200 font-semibold truncate">
-                                {question.text}
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs bg-white dark:bg-gray-900 px-2 py-1 rounded inline-block">
-                                {String(answer).substring(0, 80)}
-                                {String(answer).length > 80 ? "..." : ""}
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })
+                    {Object.entries(parsedAnswers)
+                      .filter(([_, v]) => typeof v === 'string' && !isImageUrl(v))
+                      .slice(0, 5)
+                      .map(([key, value]) => (
+                        <div key={key} className="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                            {key.length > 30 ? key.substring(0, 30) + '...' : key}
+                          </p>
+                          <p className="text-sm text-gray-800 dark:text-gray-100 font-medium">
+                            {String(value)}
+                          </p>
+                        </div>
+                      ))}
+                    {Object.keys(parsedAnswers).length > 5 && (
+                      <p className="text-center text-xs text-gray-400 mt-2 italic">
+                        + {Object.keys(parsedAnswers).length - 5} more answers...
+                      </p>
                     )}
                   </div>
                 </div>
 
-                {/* Image Preview - Only show if there are images */}
+                {/* Image Preview */}
                 {getPreviewImages().length > 0 && (
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
-                      🖼️ Image Preview ({getPreviewImages().length})
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />
+                      Images Found ({getPreviewImages().length})
                     </h3>
-                    <div className="mb-3">
-                      <div className="flex gap-2 mb-2">
-                        {!isImageConversionDone &&
-                          getUnconvertedImageCount() > 0 && (
-                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
-                              ⏳ Processing: {getUnconvertedImageCount()}
-                            </span>
-                          )}
-                      </div>
-                    </div>
-                    <ImagePreviewGrid images={getPreviewImages()} />
+                    <ImagePreviewGrid
+                      images={getPreviewImages()}
+                      onRemove={(id) => {
+                        const newAnswers = { ...parsedAnswers };
+                        delete newAnswers[id];
+                        setParsedAnswers(newAnswers);
+                        setFinalAnswers(newAnswers);
+                      }}
+                    />
                   </div>
                 )}
-
-                {/* Action Buttons - SIMPLIFIED: Only Back and Submit buttons */}
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={clearImportState}
-                    disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-gray-800 dark:text-white font-semibold rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    ← Back
-                  </button>
-
-                  {/* ONLY SHOW SUBMIT BUTTON - No Convert button */}
-                  <button
-                    onClick={handleFinalSubmit}
-                    disabled={isSubmitting || !isImageConversionDone}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-md disabled:cursor-not-allowed disabled:scale-100"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader className="w-5 h-5 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-5 h-5" />
-                        Submit & Save
-                      </>
-                    )}
-                  </button>
-                </div>
               </div>
             )}
           </div>
+
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-8 py-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-4">
+            <button
+              onClick={onClose}
+              disabled={isSubmitting || isConverting}
+              className="px-6 py-2.5 text-gray-600 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleFinalSubmit}
+              disabled={!parsedAnswers || isSubmitting || isConverting}
+              className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:shadow-none flex items-center gap-2 transform hover:scale-105 active:scale-95 disabled:scale-100"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Save & Submit
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
-    </>
+    </ModalPortal>
   );
 }

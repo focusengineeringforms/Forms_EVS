@@ -62,10 +62,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-gray-950"
-      style={{ zoom: LAYOUT_CONFIG.zoomScale }}
-    >
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       <Header />
       <main className="pt-16 transition-all duration-300">
         <div className="p-4 sm:p-6">{children}</div>

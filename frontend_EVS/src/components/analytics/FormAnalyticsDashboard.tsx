@@ -657,6 +657,15 @@ export default function FormAnalyticsDashboard() {
   );
   const [tableViewType, setTableViewType] = useState<"question" | "section">("question");
   const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
+  
+  // Restricted views for NPS forms
+  useEffect(() => {
+    if (form?.title?.toUpperCase().includes("NPS")) {
+      if (analyticsView === "table" || analyticsView === "comparison") {
+        setAnalyticsView("dashboard");
+      }
+    }
+  }, [form, analyticsView]);
 
   const [selectedQuestionId, setSelectedQuestionId] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
@@ -2455,16 +2464,18 @@ export default function FormAnalyticsDashboard() {
             <FileText className="w-4 h-4" />
             Sections
           </button>
-          <button
-            onClick={() => setAnalyticsView("table")}
-            className={`px-3 py-2.5 font-semibold transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap text-sm ${analyticsView === "table"
-              ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-              : "text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-200"
-              }`}
-          >
-            <Table className="w-4 h-4" />
-            Table
-          </button>
+          {!form?.title?.toUpperCase().includes("NPS") && (
+            <button
+              onClick={() => setAnalyticsView("table")}
+              className={`px-3 py-2.5 font-semibold transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap text-sm ${analyticsView === "table"
+                ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-200"
+                }`}
+            >
+              <Table className="w-4 h-4" />
+              Table
+            </button>
+          )}
           <button
             onClick={() => setAnalyticsView("responses")}
             className={`px-3 py-2.5 font-semibold transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap text-sm ${analyticsView === "responses"
@@ -2475,16 +2486,18 @@ export default function FormAnalyticsDashboard() {
             <Users className="w-4 h-4" />
             Responses
           </button>
-          <button
-            onClick={() => setAnalyticsView("comparison")}
-            className={`px-3 py-2.5 font-semibold transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap text-sm ${analyticsView === "comparison"
-              ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-              : "text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-200"
-              }`}
-          >
-            <Users className="w-4 h-4" />
-            Comparison
-          </button>
+          {!form?.title?.toUpperCase().includes("NPS") && (
+            <button
+              onClick={() => setAnalyticsView("comparison")}
+              className={`px-3 py-2.5 font-semibold transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap text-sm ${analyticsView === "comparison"
+                ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-200"
+                }`}
+            >
+              <Users className="w-4 h-4" />
+              Comparison
+            </button>
+          )}
         </div>
         
         {/* Right Side - Count and Actions */}

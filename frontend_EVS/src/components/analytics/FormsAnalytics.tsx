@@ -49,6 +49,7 @@ import { Mail, MessageCircle, Smartphone } from "lucide-react";
 import EmailInviteModal from "../EmailInviteModal";
 import WhatsAppInviteModal from "../WhatsAppInviteModal";
 import SMSInviteModal from "../SMSInviteModal";
+import ModalPortal from "../common/ModalPortal";
 
 // Add this interface for the dropdown options
 interface TemplateOption {
@@ -903,7 +904,7 @@ export default function FormsAnalytics() {
 
                       {/* Unified Campaign & Service Dropdown */}
                       {openCampaignMenuId === formId && (
-                        <div className="absolute left-0 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-primary-100 p-3 z-50 animate-fadeIn">
+                        <div className="absolute left-0 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-primary-100 p-3 z-50 animate-fadeIn before:absolute before:inset-x-0 before:-top-2 before:h-2 before:bg-transparent">
                           <div className="flex items-center justify-between mb-3 pb-2 border-b border-primary-50">
                             <h4 className="text-xs font-bold text-primary-800 uppercase tracking-wider">Campaign Center</h4>
                             <button onClick={() => setOpenCampaignMenuId(null)} className="text-primary-400 hover:text-primary-600">
@@ -1325,208 +1326,198 @@ export default function FormsAnalytics() {
         }}
       />
 
-      {isPreviewOpen && previewFormData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-primary-800 dark:text-primary-100">
-                  Edit Imported Form
-                </h2>
-                <p className="text-sm text-primary-600 dark:text-primary-400">
-                  Modify form details and then save
-                </p>
-              </div>
-              <button
-                onClick={handleCancelImport}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
+      <ModalPortal>
+        {isPreviewOpen && previewFormData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] overflow-y-auto ring-1 ring-white dark:ring-gray-900">
+              <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
-                    Form Title
-                  </label>
-                  <input
-                    type="text"
-                    value={previewFormData.title || ""}
-                    onChange={(e) =>
-                      setPreviewFormData({
-                        ...previewFormData,
-                        title: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary-500"
-                    placeholder="Enter form title"
-                  />
+                  <h2 className="text-xl font-bold text-primary-800 dark:text-primary-100">
+                    Edit Imported Form
+                  </h2>
+                  <p className="text-sm text-primary-600 dark:text-primary-400">
+                    Modify form details and then save
+                  </p>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={previewFormData.description || ""}
-                    onChange={(e) =>
-                      setPreviewFormData({
-                        ...previewFormData,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary-500"
-                    placeholder="Enter form description (optional)"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
-                      Sections
-                    </label>
-                    <p className="text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg font-medium">
-                      {previewFormData.sections?.length || 0} section(s)
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
-                      Total Questions
-                    </label>
-                    <p className="text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg font-medium">
-                      {previewFormData.sections?.reduce(
-                        (sum, s) => sum + (s.questions?.length || 0),
-                        0
-                      ) || 0}{" "}
-                      question(s)
-                    </p>
-                  </div>
-                </div>
-
-                {previewFormData.sections &&
-                  previewFormData.sections.length > 0 && (
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-3">
-                        Sections & Questions
-                      </label>
-                      <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
-                        {previewFormData.sections.map((section, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-                          >
-                            <div className="mb-3">
-                              <label className="text-xs font-medium text-primary-600 dark:text-primary-400 block mb-1">
-                                Section {idx + 1} Title
-                              </label>
-                              <input
-                                type="text"
-                                value={section.title || ""}
-                                onChange={(e) => {
-                                  const updatedSections = [
-                                    ...(previewFormData.sections || []),
-                                  ];
-                                  updatedSections[idx] = {
-                                    ...updatedSections[idx],
-                                    title: e.target.value,
-                                  };
-                                  setPreviewFormData({
-                                    ...previewFormData,
-                                    sections: updatedSections,
-                                  });
-                                }}
-                                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary-500"
-                              />
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                              <p className="font-medium">
-                                Questions ({section.questions?.length || 0}):
-                              </p>
-                              {section.questions &&
-                                section.questions.length > 0 ? (
-                                <ul className="space-y-1 ml-2">
-                                  {section.questions.map((q, qIdx) => (
-                                    <li
-                                      key={qIdx}
-                                      className="text-xs text-gray-600 dark:text-gray-400 flex items-start"
-                                    >
-                                      <span className="mr-2">•</span>
-                                      <span className="break-words">
-                                        {q.text || `Question ${qIdx + 1}`}
-                                      </span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-xs text-gray-500 ml-2">
-                                  No questions
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={handleCancelImport}
-                  disabled={isSavingForm}
-                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  Cancel
+                  <X className="w-6 h-6 text-gray-500" />
                 </button>
-                <button
-                  onClick={handleConfirmImport}
-                  disabled={isSavingForm || !previewFormData.title?.trim()}
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isSavingForm ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      Save Form
-                    </>
-                  )}
-                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                      Form Title
+                    </label>
+                    <input
+                      type="text"
+                      value={previewFormData.title || ""}
+                      onChange={(e) =>
+                        setPreviewFormData({
+                          ...previewFormData,
+                          title: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary-500"
+                      placeholder="Enter form title"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={previewFormData.description || ""}
+                      onChange={(e) =>
+                        setPreviewFormData({
+                          ...previewFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary-500"
+                      placeholder="Enter form description (optional)"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                        Sections
+                      </label>
+                      <p className="text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg font-medium">
+                        {previewFormData.sections?.length || 0} section(s)
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                        Total Questions
+                      </label>
+                      <p className="text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg font-medium">
+                        {previewFormData.sections?.reduce(
+                          (acc, s) => acc + (s.questions?.length || 0),
+                          0
+                        )}{" "}
+                        question(s)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <h3 className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-3 flex items-center gap-2">
+                      <Layout className="w-4 h-4" />
+                      Structure Preview
+                    </h3>
+                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                      {previewFormData.sections?.map((section, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-sm font-bold text-primary-800 dark:text-primary-200">
+                              {section.title || `Section ${idx + 1}`}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded font-bold uppercase tracking-wider">
+                              {section.questions?.length || 0} Questions
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {section.questions && section.questions.length > 0 ? (
+                              <ul className="space-y-1 ml-2">
+                                {section.questions.map((q, qIdx) => (
+                                  <li
+                                    key={qIdx}
+                                    className="text-xs text-gray-600 dark:text-gray-400 flex items-start"
+                                  >
+                                    <span className="mr-2">•</span>
+                                    <span className="break-words">
+                                      {q.text || `Question ${qIdx + 1}`}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-gray-500 ml-2">
+                                No questions
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={handleCancelImport}
+                    disabled={isSavingForm}
+                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmImport}
+                    disabled={isSavingForm || !previewFormData.title?.trim()}
+                    className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSavingForm ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Form
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-      <EmailInviteModal
-        isOpen={emailInviteModal.open}
-        onClose={() =>
-          setEmailInviteModal((prev) => ({ ...prev, open: false }))
-        }
-        formId={emailInviteModal.formId || ""}
-        formTitle={emailInviteModal.formTitle}
-      />
-      <WhatsAppInviteModal
-        isOpen={whatsappInviteModal.open}
-        onClose={() =>
-          setWhatsappInviteModal((prev) => ({ ...prev, open: false }))
-        }
-        formId={whatsappInviteModal.formId || ""}
-        formTitle={whatsappInviteModal.formTitle}
-      />
-      <SMSInviteModal
-        isOpen={smsInviteModal.open}
-        onClose={() =>
-          setSmsInviteModal((prev) => ({ ...prev, open: false }))
-        }
-        formId={smsInviteModal.formId || ""}
-        formTitle={smsInviteModal.formTitle}
-      />
+        )}
+      </ModalPortal>
+
+      <ModalPortal>
+        <EmailInviteModal
+          isOpen={emailInviteModal.open}
+          onClose={() =>
+            setEmailInviteModal((prev) => ({ ...prev, open: false }))
+          }
+          formId={emailInviteModal.formId || ""}
+          formTitle={emailInviteModal.formTitle}
+        />
+      </ModalPortal>
+
+      <ModalPortal>
+        <WhatsAppInviteModal
+          isOpen={whatsappInviteModal.open}
+          onClose={() =>
+            setWhatsappInviteModal((prev) => ({ ...prev, open: false }))
+          }
+          formId={whatsappInviteModal.formId || ""}
+          formTitle={whatsappInviteModal.formTitle}
+        />
+      </ModalPortal>
+
+      <ModalPortal>
+        <SMSInviteModal
+          isOpen={smsInviteModal.open}
+          onClose={() =>
+            setSmsInviteModal((prev) => ({ ...prev, open: false }))
+          }
+          formId={smsInviteModal.formId || ""}
+          formTitle={smsInviteModal.formTitle}
+        />
+      </ModalPortal>
     </div>
   );
 }
