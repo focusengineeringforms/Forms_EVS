@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User, Lock, Chrome, Facebook, Github, Linkedin, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { useLogo } from "../../context/LogoContext";
+
 import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
@@ -11,7 +11,6 @@ export default function LoginPage() {
     loading: authLoading,
     isAuthenticated,
   } = useAuth();
-  const { logo } = useLogo();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -39,10 +38,7 @@ export default function LoginPage() {
       
       {/* Left Side: Welcome Panel - Full Height, Blue Background, Smaller Curve */}
       <div className="w-full md:w-1/2 bg-[#1e3a8a] text-white p-8 md:p-12 flex flex-col justify-center items-center text-center relative z-20 rounded-b-[3rem] md:rounded-b-none md:rounded-r-[10rem]">
-        {/* Logo at top left */}
-        <div className="absolute top-6 left-6 md:top-10 md:left-10">
-          <img src={logo} alt="Logo" className="h-12 md:h-16 w-auto object-contain" />
-        </div>
+
         
         <div className="max-w-md animate-in fade-in slide-in-from-left-8 duration-700">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Hello, Welcome!</h1>
