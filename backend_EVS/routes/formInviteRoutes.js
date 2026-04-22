@@ -11,9 +11,9 @@ import {
   uploadWhatsAppInvites,
   sendWhatsAppInvites
 } from '../controllers/whatsappController.js';
-import { authenticate, teacherOrAdmin } from '../middleware/auth.js';
+import { authenticate, teacherOrAdmin, adminOnly } from '../middleware/auth.js';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 // Configure multer for file upload
 const storage = multer.memoryStorage();
@@ -34,59 +34,49 @@ const upload = multer({
   }
 });
 
-// Admin middleware (you need to create this)
-const adminOnly = (req, res, next) => {
-  if (req.user.role === 'admin' || req.user.role === 'superadmin') {
-    next();
-  } else {
-    res.status(403).json({
-      success: false,
-      message: 'Admin access required'
-    });
-  }
-};
+
 
 // Routes
-router.post('/:formId/invites/upload',
+router.post('/upload',
   authenticate,
   adminOnly,
   upload.single('file'),
   uploadInvites
 );
 
-router.post('/:formId/invites/send',
+router.post('/send',
   authenticate,
   adminOnly,
   sendInvites
 );
 
-router.post('/:formId/invites/whatsapp/upload',
+router.post('/whatsapp/upload',
   authenticate,
   adminOnly,
   upload.single('file'),
   uploadWhatsAppInvites
 );
 
-router.post('/:formId/invites/whatsapp/send',
+router.post('/whatsapp/send',
   authenticate,
   adminOnly,
   sendWhatsAppInvites
 );
 
 // SMS routes
-router.post('/:formId/invites/sms/send',
+router.post('/sms/send',
   authenticate,
   adminOnly,
   sendSMSInvites
 );
 
-router.get('/:formId/invites/stats',
+router.get('/stats',
   authenticate,
   adminOnly,
   getInviteStats
 );
 // Add to your formInviteRoutes.js
-router.get('/:formId/invites',
+router.get('/',
   authenticate,
   adminOnly,
   getInviteList

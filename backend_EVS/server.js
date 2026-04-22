@@ -27,7 +27,6 @@ import { initializeSocket } from "./socket/socketHandler.js";
 import pdfService from './services/pdfService.js';
 import pdfRoutes from './routes/pdfRoutes.js'; 
 import githubWebhookRoutes from "./routes/githubWebhook.js";
-import formInviteRoutes from './routes/formInviteRoutes.js';
 
 import uploadRoutes from './routes/upload.js';
 import fixRoutes from './routes/fixRoutes.js';
@@ -61,6 +60,7 @@ const developmentOrigins = [
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3001",
   "http://localhost:5173", // Vite default
+  "http://127.0.0.1:5173",
   "http://localhost:5174", // Vite alternate port
   "http://localhost:5175", // Current Vite port
   "http://127.0.0.1:5174",
@@ -137,7 +137,7 @@ app.use("/api/whatsapp", whatsappRoutes);
 app.use("/api/tenants", tenantRoutes);
 app.use("/api/parameters", parameterRoutes);
 app.use('/api/pdf', pdfRoutes);
-app.use('/api/forms', formInviteRoutes);
+
 app.use('/api/fix', fixRoutes);
 
 

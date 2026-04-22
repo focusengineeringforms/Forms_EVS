@@ -629,10 +629,10 @@ const InviteStatusPage: React.FC = () => {
                               <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] ${
                                 darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'
                               }`}>
-                                {invite.email.charAt(0).toUpperCase()}
+                                {((invite.email || invite.phone || invite.inviteId || "?").charAt(0)).toUpperCase()}
                               </div>
                               <div className="flex flex-col">
-                                <span className={`text-[11px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{invite.email}</span>
+                                <span className={`text-[11px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{invite.email || invite.phone || "No Identifier"}</span>
                                 <span className={`text-[9px] font-medium ${darkMode ? 'text-slate-600' : 'text-slate-400'}`}>{invite.inviteId}</span>
                               </div>
                             </div>

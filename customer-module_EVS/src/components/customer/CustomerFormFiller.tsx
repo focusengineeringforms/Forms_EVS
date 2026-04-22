@@ -98,13 +98,11 @@ export default function CustomerFormFiller({
   const [submitted, setSubmitted] = useState(false);
   const { darkMode } = useTheme();
   
-  const getMainSections = () => {
+  const mainSections = React.useMemo(() => {
     if (!form) return [];
     return form.sections.filter((s) => !s.isSubsection);
-  };
+  }, [form]);
 
-  // Theme preference - we want it to look "neat" and "premium"
-  const mainSections = getMainSections();
   const totalSteps = mainSections.length > 0 ? mainSections.length : 1;
   const progress = ((currentSectionIndex + 1) / totalSteps) * 100;
 
@@ -283,11 +281,14 @@ export default function CustomerFormFiller({
         if (fetchedForm && fetchedForm.sections) {
           fetchedForm.sections = fetchedForm.sections.map((section: any) => {
             const allQuestions = [...section.questions];
+            const existingIds = new Set(allQuestions.map(q => q.id));
+
             section.questions.forEach((q: any) => {
               if (q.followUpQuestions && Array.isArray(q.followUpQuestions)) {
                 q.followUpQuestions.forEach((fq: any) => {
-                  if (!allQuestions.find((existing) => existing.id === fq.id)) {
+                  if (!existingIds.has(fq.id)) {
                     allQuestions.push(fq);
+                    existingIds.add(fq.id);
                   }
                 });
               }
@@ -396,7 +397,6 @@ export default function CustomerFormFiller({
     e.preventDefault();
     if (!form || !formId) return;
 
-    const mainSections = getMainSections();
     const currentMainSection = mainSections[currentSectionIndex];
     if (!validateSections([currentMainSection])) {
       return;
@@ -446,7 +446,6 @@ export default function CustomerFormFiller({
 // Removed duplicated getMainSections from here
 
   const handleNextSection = () => {
-    const mainSections = getMainSections();
     if (currentSectionIndex < mainSections.length - 1) {
       setCurrentSectionIndex(currentSectionIndex + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -462,11 +461,23 @@ export default function CustomerFormFiller({
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-slate-400' : 'bg-slate-50 text-slate-500'} flex flex-col items-center justify-center gap-4`}>
-        <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin" />
+      <div className={`min-h-screen ${darkMode ? 'bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1a1c3d] to-[#0a0b1e] text-white' : 'bg-slate-50 text-slate-500'} flex flex-col items-center justify-center gap-8`}>
+        <div className="relative flex items-center justify-center">
+          <div className="absolute h-24 w-24 rounded-full border-[1px] border-blue-500/20 animate-[ping_2s_linear_infinite]" />
+          <div className="absolute h-16 w-16 rounded-full border-[1px] border-emerald-500/30 animate-[ping_1.5s_linear_infinite]" />
+          <div className="h-12 w-12 rounded-full border-2 border-transparent border-t-blue-500 border-r-blue-500/30 animate-spin" />
         </div>
-        <p className="text-sm font-bold tracking-widest uppercase animate-pulse">{t.loading}</p>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs font-black tracking-[0.3em] uppercase opacity-80 animate-pulse">{t.loading}</p>
+          <div className="h-[2px] w-12 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full animate-[shimmer_2s_infinite]" />
+        </div>
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+          }
+        `}</style>
       </div>
     );
   }

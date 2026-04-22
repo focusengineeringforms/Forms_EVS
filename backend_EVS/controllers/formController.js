@@ -536,11 +536,27 @@ export const getFormById = async (req, res) => {
       select: 'username firstName lastName email'
     };
 
-    // Use .lean() directly
-    let form = await Form.findOne({ id: id }).populate(populateOptions.path, populateOptions.select).lean();
+    // Optimized query for public access
+    let formQuery = Form.findOne({ id: id });
+
+    // Only populate createdBy for admin/authenticated requests
+    if (!tenantSlug) {
+      formQuery = formQuery.populate(populateOptions.path, populateOptions.select);
+    } else {
+      // Exclude obviously unnecessary heavy fields for public
+      formQuery = formQuery.select('-createdBy -permissions -__v');
+    }
+
+    let form = await formQuery.lean();
 
     if (!form && mongoose.Types.ObjectId.isValid(id)) {
-      form = await Form.findById(id).populate(populateOptions.path, populateOptions.select).lean();
+      let findByIdQuery = Form.findById(id);
+      if (!tenantSlug) {
+        findByIdQuery = findByIdQuery.populate(populateOptions.path, populateOptions.select);
+      } else {
+        findByIdQuery = findByIdQuery.select('-createdBy -permissions -__v');
+      }
+      form = await findByIdQuery.lean();
     }
 
     if (!form) {
@@ -567,9 +583,8 @@ export const getFormById = async (req, res) => {
     // For public access with tenant slug, verify tenant and form visibility
     if (tenantSlug) {
       const Tenant = mongoose.model('Tenant');
-      const tenant = await Tenant.findOne({ slug: tenantSlug, isActive: true });
+      const tenant = await Tenant.findOne({ slug: tenantSlug, isActive: true }).select('settings companyName _id').lean();
       
-      // If form is NOT global, we require a valid tenant and proper ownership/sharing
       if (!form.isGlobal) {
         if (!tenant) {
           return res.status(404).json({
@@ -597,7 +612,7 @@ export const getFormById = async (req, res) => {
         });
       }
       
-      // Add tenant branding to the form data if tenant exists
+      // Add tenant branding to the form data
       if (tenant) {
         form.tenantBranding = {
           logo: tenant.settings?.logo,
@@ -605,6 +620,9 @@ export const getFormById = async (req, res) => {
           companyName: tenant.companyName
         };
       }
+
+      // Clean up internal data before sending to public client
+      delete form.sharedWithTenants;
     }
     
     // For public access (no req.user and no tenantSlug), check if form is visible
