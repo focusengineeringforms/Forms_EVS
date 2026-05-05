@@ -310,7 +310,7 @@ export const uploadInvites = async (req, res) => {
         valid: validRecords.length,
         invalid: invalidRecords.length,
         duplicateEmails: records.length - seenEmails.size,
-        preview: preview.slice(0, 10), // First 10 for preview
+        preview: preview.slice(0, 1000), // Increased from 10 to 1000
         sampleLink: `${inviteBaseUrl}/${tenantSlug}/forms/${formId}?inviteId=SAMPLE_INVITE_ID`,
         form: {
           id: form.id,

@@ -193,7 +193,7 @@ export const uploadWhatsAppInvites = async (req, res) => {
         valid: validRecords.length,
         invalid: invalidRecords.length,
         duplicatePhones: records.length - seenPhones.size,
-        preview: preview.slice(0, 10),
+        preview: preview.slice(0, 1000), // Increased from 10 to 1000
         sampleLink: `${baseUrl}/${tenantSlug}/forms/${formId}?inviteId=SAMPLE_INVITE_ID`,
         form: {
           id: form.id,
