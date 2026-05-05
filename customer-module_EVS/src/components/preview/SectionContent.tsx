@@ -1,3 +1,4 @@
+import React from "react";
 import type { Section } from "../../types";
 import QuestionRenderer from "../QuestionRenderer";
 import { useQuestionLogic } from "../../hooks/useQuestionLogic";
