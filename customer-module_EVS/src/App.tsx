@@ -32,6 +32,7 @@ function TenantRouteWrapper() {
 }
 
 export default function App() {
+  console.log("[App] Rendering main App component");
   return (
     <ThemeProvider>
       <BrowserRouter>

@@ -256,10 +256,15 @@ export default function CustomerFormFiller({
 
   useEffect(() => {
     const fetchForm = async () => {
-      if (!formId) return;
+      if (!formId) {
+        console.warn("[FormFiller] No formId provided in params");
+        return;
+      }
 
+      console.log(`[FormFiller] Fetching form: ${formId} (Tenant: ${tenantSlug})`);
       try {
         const response = await apiClient.getPublicForm(formId, tenantSlug, inviteId);
+        console.log("[FormFiller] API Response received:", response ? "Success" : "Empty");
         if (!response) {
           setError("Form data unavailable");
           setLoading(false);
@@ -278,21 +283,23 @@ export default function CustomerFormFiller({
           ];
         }
 
-        if (fetchedForm && fetchedForm.sections) {
+        if (fetchedForm && fetchedForm.sections && Array.isArray(fetchedForm.sections)) {
           fetchedForm.sections = fetchedForm.sections.map((section: any) => {
-            const allQuestions = [...section.questions];
+            const allQuestions = Array.isArray(section.questions) ? [...section.questions] : [];
             const existingIds = new Set(allQuestions.map(q => q.id));
 
-            section.questions.forEach((q: any) => {
-              if (q.followUpQuestions && Array.isArray(q.followUpQuestions)) {
-                q.followUpQuestions.forEach((fq: any) => {
-                  if (!existingIds.has(fq.id)) {
-                    allQuestions.push(fq);
-                    existingIds.add(fq.id);
-                  }
-                });
-              }
-            });
+            if (Array.isArray(section.questions)) {
+              section.questions.forEach((q: any) => {
+                if (q && q.followUpQuestions && Array.isArray(q.followUpQuestions)) {
+                  q.followUpQuestions.forEach((fq: any) => {
+                    if (fq && fq.id && !existingIds.has(fq.id)) {
+                      allQuestions.push(fq);
+                      existingIds.add(fq.id);
+                    }
+                  });
+                }
+              });
+            }
             return { 
               ...section, 
               id: section.id || section._id,
@@ -332,7 +339,7 @@ export default function CustomerFormFiller({
     };
 
     fetchForm();
-  }, [formId, tenantSlug]);
+  }, [formId, tenantSlug, inviteId]);
 
   useEffect(() => {
     if (!form || form.locationEnabled === false) {

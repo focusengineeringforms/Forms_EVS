@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5174,
   },
   optimizeDeps: {
-    exclude: ["lucide-react"],
+    include: ["lucide-react"],
   },
   test: {
     globals: true,

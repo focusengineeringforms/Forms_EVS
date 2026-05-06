@@ -7,23 +7,28 @@ import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { migrateLocalStorageForms } from "./utils/migrateLocalStorage";
+import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
 // Run localStorage migration on app startup
+console.log("[Main] Starting app initialization...");
 migrateLocalStorageForms();
+console.log("[Main] LocalStorage migration complete.");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
-      <LogoProvider>
-        <AuthProvider>
-          <SidebarProvider>
-            <NotificationProvider>
-              <App />
-            </NotificationProvider>
-          </SidebarProvider>
-        </AuthProvider>
-      </LogoProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LogoProvider>
+          <AuthProvider>
+            <SidebarProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </LogoProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>
 );
