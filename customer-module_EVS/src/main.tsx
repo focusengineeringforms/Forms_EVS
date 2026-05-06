@@ -1,5 +1,11 @@
 import { StrictMode } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
+
+// Ensure React is available globally for any legacy dependencies or specific build transforms
+if (typeof window !== "undefined") {
+  (window as any).React = React;
+}
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LogoProvider } from "./context/LogoContext";

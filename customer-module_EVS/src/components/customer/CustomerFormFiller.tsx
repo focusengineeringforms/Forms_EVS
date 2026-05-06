@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { apiClient } from "../../api/client";
 import SectionContent from "../preview/SectionContent";
@@ -40,7 +40,7 @@ export default function CustomerFormFiller({
   const inviteId = searchParams.get("inviteId");
   
   // Language Support - Reactive Detection
-  const language = React.useMemo(() => {
+  const language = useMemo(() => {
     const lang = searchParams.get("lang")?.toLowerCase();
     if (lang === 'ar') return 'ar';
     if (lang === 'both') return 'both';
@@ -98,7 +98,7 @@ export default function CustomerFormFiller({
   const [submitted, setSubmitted] = useState(false);
   const { darkMode } = useTheme();
   
-  const mainSections = React.useMemo(() => {
+  const mainSections = useMemo(() => {
     if (!form) return [];
     return form.sections.filter((s) => !s.isSubsection);
   }, [form]);
