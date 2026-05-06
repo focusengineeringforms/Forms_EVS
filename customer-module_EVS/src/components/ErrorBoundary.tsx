@@ -25,6 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public render() {
+    console.log("[ErrorBoundary] Rendering. hasError:", this.state.hasError);
     if (this.state.hasError) {
       return (
         <BrandedError
@@ -35,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.children;
+    return this.props.children;
   }
 }
 

@@ -34,25 +34,23 @@ function TenantRouteWrapper() {
 export default function App() {
   console.log("[App] Rendering main App component");
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <NotificationContainer />
-        <Routes>
-          <Route path="/:tenantSlug/*" element={<TenantRouteWrapper />} />
-          <Route
-            path="/"
-            element={
-              <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Welcome to Customer Portal
-                  </h1>
-                </div>
+    <BrowserRouter>
+      <NotificationContainer />
+      <Routes>
+        <Route path="/:tenantSlug/*" element={<TenantRouteWrapper />} />
+        <Route
+          path="/"
+          element={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                  Welcome to Customer Portal
+                </h1>
               </div>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+            </div>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }

@@ -24,8 +24,9 @@ import "./index.css";
 console.log("[Main] Starting app initialization... (Version: 1.0.5-POLYFILL-FIX)");
 // window.alert("Focus Forms Initializing... Version 1.0.5");
 migrateLocalStorageForms();
-console.log("[Main] LocalStorage migration complete.");
+console.log("[Main] LocalStorage migration complete. Starting React render...");
 
+console.log("[Main] Preparing to render root...");
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
