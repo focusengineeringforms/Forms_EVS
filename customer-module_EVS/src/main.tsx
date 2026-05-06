@@ -21,8 +21,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
 // Run localStorage migration on app startup
-console.log("[Main] Starting app initialization...");
-// window.alert("Focus Forms Initializing..."); // Uncomment if needed for hard debugging
+console.log("[Main] Starting app initialization... (Version: 1.0.5-POLYFILL-FIX)");
+// window.alert("Focus Forms Initializing... Version 1.0.5");
 migrateLocalStorageForms();
 console.log("[Main] LocalStorage migration complete.");
 
