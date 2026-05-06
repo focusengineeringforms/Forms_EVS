@@ -231,28 +231,60 @@ class ApiClient {
   }
 
   async getPublicForm(id: string, tenantSlug?: string, inviteId?: string | null) {
-    let endpoint = tenantSlug
-      ? `/forms/${id}/public/${tenantSlug}`
-      : `/forms/${id}/public`;
-    
-    if (inviteId) {
-      endpoint += `?inviteId=${inviteId}`;
+    const params = new URLSearchParams();
+    if (tenantSlug) params.append("tenantSlug", tenantSlug);
+    if (inviteId) params.append("inviteId", inviteId);
+
+    const makeRequest = async (baseUrl: string) => {
+      const endpoint = tenantSlug
+        ? `/forms/${id}/public/${tenantSlug}`
+        : `/forms/${id}/public`;
+      
+      const url = `${baseUrl}${endpoint}?${params.toString()}`;
+      
+      // Add a 10-second timeout to the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        const data: ApiResponse<{ form: any }> = await response.json();
+
+        if (!response.ok) {
+          throw new ApiError(response.status, data, data.message);
+        }
+
+        if (!data.success) {
+          throw new ApiError(response.status, data, data.message);
+        }
+
+        return data.data;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    };
+
+    try {
+      return await makeRequest(this.baseUrl);
+    } catch (error: any) {
+      // If it's a conflict or not found, don't retry
+      if (error.status === 409 || error.status === 404) throw error;
+      
+      const FALLBACK_PROD_URL = "https://forms-backend-1-9ate.onrender.com/api";
+      if (this.baseUrl !== FALLBACK_PROD_URL) {
+        console.warn(`⚠️ Primary API failed or timed out, trying fallback: ${FALLBACK_PROD_URL}`);
+        try {
+          return await makeRequest(FALLBACK_PROD_URL);
+        } catch (fallbackError) {
+          console.error("❌ Both Primary and Fallback APIs failed");
+          throw fallbackError;
+        }
+      }
+      throw error;
     }
-    
-    const url = `${this.baseUrl}${endpoint}`;
-
-    const response = await fetch(url);
-    const data: ApiResponse<{ form: any }> = await response.json();
-
-    if (!response.ok) {
-      throw new ApiError(response.status, data, data.message);
-    }
-
-    if (!data.success) {
-      throw new ApiError(response.status, data, data.message);
-    }
-
-    return data.data;
   }
 
   async createForm(formData: any) {
