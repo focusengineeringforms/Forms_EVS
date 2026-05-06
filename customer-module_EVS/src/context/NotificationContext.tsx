@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, ReactNode, FC } from "react";
 
 export type NotificationType =
   | "success"
@@ -55,7 +55,7 @@ export const useNotification = () => {
   return context;
 };
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+export const NotificationProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);

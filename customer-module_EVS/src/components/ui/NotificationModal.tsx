@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, FC } from "react";
 import {
   CheckCircle,
   XCircle,
@@ -21,7 +21,7 @@ interface NotificationModalProps {
   cancelText?: string;
 }
 
-const NotificationModal: React.FC<NotificationModalProps> = ({
+const NotificationModal: FC<NotificationModalProps> = ({
   id,
   type,
   title,

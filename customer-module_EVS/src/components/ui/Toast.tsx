@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, FC } from "react";
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
 import { NotificationType } from "../../context/NotificationContext";
 
@@ -11,7 +11,7 @@ interface ToastProps {
   duration?: number;
 }
 
-const Toast: React.FC<ToastProps> = ({
+const Toast: FC<ToastProps> = ({
   id,
   type,
   title,
