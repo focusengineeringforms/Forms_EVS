@@ -8,15 +8,24 @@ const API_BASE_URL = (() => {
     hostname.startsWith("10.") ||
     hostname.startsWith("172.");
 
+  // Primary URL from code, fallback from README
+  const PRIMARY_PROD_URL = "https://forms-evs.onrender.com/api";
+  const FALLBACK_PROD_URL = "https://forms-backend-1-9ate.onrender.com/api";
+
   const baseUrl = isLocal
     ? "http://localhost:5001/api"
-    : "https://forms-evs.onrender.com/api";
+    : PRIMARY_PROD_URL;
 
   console.log(
     `🔗 API Base URL: ${baseUrl} (Environment: ${
       isLocal ? "Local" : "Production"
     })`
   );
+  
+  if (!isLocal) {
+    console.log(`📡 Secondary API Fallback available: ${FALLBACK_PROD_URL}`);
+  }
+
   return baseUrl;
 })();
 

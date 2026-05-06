@@ -12,6 +12,7 @@ import "./index.css";
 
 // Run localStorage migration on app startup
 console.log("[Main] Starting app initialization...");
+// window.alert("Focus Forms Initializing..."); // Uncomment if needed for hard debugging
 migrateLocalStorageForms();
 console.log("[Main] LocalStorage migration complete.");
 

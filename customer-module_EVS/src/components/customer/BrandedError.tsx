@@ -19,7 +19,7 @@ export const BrandedError: React.FC<BrandedErrorProps> = ({
   darkMode = false,
 }) => {
   return (
-    <div className={`h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center ${darkMode ? 'bg-[#0a0b1e] text-white' : 'bg-slate-50 text-slate-900'} font-sans overflow-hidden relative selection:bg-rose-500/30`}>
+    <div className={`h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center ${darkMode ? 'bg-[#0a0b1e] text-white' : 'bg-slate-100 text-slate-900'} font-sans overflow-hidden relative selection:bg-rose-500/30`}>
       {/* Dynamic Background Accents */}
       <div className="fixed top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none animate-pulse" />
       <div className="fixed bottom-[-10%] left-[-10%] w-[30%] h-[30%] rounded-full bg-orange-500/5 blur-[100px] pointer-events-none animate-pulse delay-700" />
