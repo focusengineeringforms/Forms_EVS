@@ -261,13 +261,13 @@ export default function CustomerFormFiller({
         return;
       }
 
-      // Safety timeout: if loading takes more than 15 seconds, show error
+      // Safety timeout: if loading takes more than 45 seconds, show error
       const safetyTimeout = setTimeout(() => {
         if (loading) {
           setError("Loading timed out. The server might be slow. Please try again.");
           setLoading(false);
         }
-      }, 15000);
+      }, 45000);
 
       console.log(`[FormFiller] Fetching form: ${formId} (Tenant: ${tenantSlug})`);
       try {

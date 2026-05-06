@@ -242,9 +242,9 @@ class ApiClient {
       
       const url = `${baseUrl}${endpoint}?${params.toString()}`;
       
-      // Add a 10-second timeout to the fetch request
+      // Add a 30-second timeout to the fetch request (allowing for Render spin-up)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         const response = await fetch(url, { signal: controller.signal });
