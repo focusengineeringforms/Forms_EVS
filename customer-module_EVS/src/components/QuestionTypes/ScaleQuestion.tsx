@@ -48,29 +48,28 @@ export default function ScaleQuestion({
   const isLargeScale = max > 5;
 
   return (
-    <div className={`space-y-4 py-2 w-full max-w-4xl mx-auto transition-all duration-500`}>
+    <div className={`space-y-6 py-4 w-full max-w-4xl mx-auto transition-all duration-500`}>
       
       {/* Circular Buttons Container */}
-      <div className={`relative overflow-visible ${isLargeScale ? 'px-2 sm:px-4' : ''}`}>
+      <div className={`relative overflow-visible ${isLargeScale ? 'px-1' : ''}`}>
         
-        <div className={`flex items-center ${isLargeScale ? 'justify-between w-full' : 'justify-center gap-4 sm:gap-14'} py-4 no-scrollbar flex-nowrap overflow-x-auto overflow-y-visible`}>
+        <div className={`flex items-center ${isLargeScale ? 'justify-between sm:justify-between w-full gap-1 sm:gap-2' : 'justify-center gap-3 sm:gap-10'} py-2 no-scrollbar flex-nowrap overflow-x-auto overflow-y-visible`}>
 
           {options.map((val) => {
             const isSelected = value === val.toString();
-            const isLargeScale = max > 5;
             
             // Branding colors based on the value
             const getButtonStyles = () => {
               if (isSelected) {
                 if (isLargeScale) {
-                  return 'bg-[#2563EB] border-[#2563EB] text-white';
+                  return 'bg-[#2563EB] border-[#2563EB] text-white shadow-lg shadow-blue-500/30 scale-110';
                 } else {
-                  return 'bg-[#E11D48] border-[#E11D48] text-white';
+                  return 'bg-[#E11D48] border-[#E11D48] text-white shadow-lg shadow-rose-500/30 scale-110';
                 }
               }
               return darkMode 
-                ? 'bg-[#0B0C10] border-slate-700 text-slate-300 hover:border-slate-500 hover:text-white' 
-                : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-800';
+                ? 'bg-[#0B0C10] border-slate-800 text-slate-400 hover:border-slate-600 hover:text-white' 
+                : 'bg-white border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-600';
             };
 
             return (
@@ -83,20 +82,14 @@ export default function ScaleQuestion({
                   onChange(value === stringVal ? "" : stringVal);
                 }}
                 disabled={readOnly}
-                className={`shrink-0 relative rounded-full flex items-center justify-center font-bold transition-all duration-200
+                className={`shrink-0 relative rounded-full flex items-center justify-center font-extrabold transition-all duration-300
                   ${isLargeScale 
-                    ? "w-[26px] h-[26px] min-[380px]:w-8 min-[380px]:h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 text-[10px] sm:text-base md:text-xl" 
-                    : "w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 lg:w-16 lg:h-16 text-xs sm:text-xl md:text-2xl"} 
-                  ${getButtonStyles()} border-2
-                  ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md hover:scale-105 active:scale-95'} 
+                    ? "w-[28px] h-[28px] min-[360px]:w-[30px] min-[360px]:h-[30px] min-[400px]:w-9 min-[400px]:h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 text-[11px] min-[360px]:text-xs sm:text-lg md:text-xl" 
+                    : "w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 text-sm sm:text-xl md:text-2xl"} 
+                  ${getButtonStyles()} border-[1.5px] sm:border-2
+                  ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md active:scale-90'} 
                   z-10
                 `}
-                style={{ 
-                  backgroundColor: isSelected ? (isLargeScale ? '#2563EB' : '#E11D48') : undefined,
-                  borderColor: isSelected ? (isLargeScale ? '#2563EB' : '#E11D48') : undefined,
-                  color: isSelected ? '#FFFFFF' : undefined
-                }}
-
               >
                 {val}
               </button>

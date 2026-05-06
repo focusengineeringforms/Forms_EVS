@@ -558,12 +558,11 @@ export default function CustomerFormFiller({
       </div>
 
       {/* Scrollable form area */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }} className="w-full no-scrollbar">
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }} className="w-full no-scrollbar px-3 md:px-6">
         <form
           id="customer-form"
           onSubmit={handleSubmit}
-          style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-          className="w-full max-w-3xl mx-auto px-3 md:px-6"
+          className="w-full max-w-3xl mx-auto py-4"
         >
           {(() => {
             const currentMainSection = mainSections[currentSectionIndex];
@@ -615,22 +614,30 @@ export default function CustomerFormFiller({
               </div>
             );
           })()}
-
-          {/* Submit button */}
-          <div style={{ paddingBottom: '10px', paddingTop: '8px' }}>
-            <NavigationButtons
-              isFirstSection={currentSectionIndex === 0}
-              isLastSection={currentSectionIndex === totalSteps - 1}
-              onPrevious={handlePrevSection}
-              onNext={handleNextSection}
-              onSubmit={handleSubmit}
-              submitDisabled={submitting}
-              submitting={submitting}
-              language={language}
-              translations={t}
-            />
-          </div>
         </form>
+      </div>
+
+      {/* Sticky Footer for Submit/Next button */}
+      <div 
+        style={{ flexShrink: 0 }} 
+        className={`w-full p-4 border-t ${darkMode ? 'bg-[#0a0b1e] border-slate-800' : 'bg-white border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]'}`}
+      >
+        <div className="max-w-3xl mx-auto flex flex-col gap-2">
+          <NavigationButtons
+            isFirstSection={currentSectionIndex === 0}
+            isLastSection={currentSectionIndex === totalSteps - 1}
+            onPrevious={handlePrevSection}
+            onNext={handleNextSection}
+            onSubmit={handleSubmit}
+            submitDisabled={submitting}
+            submitting={submitting}
+            language={language}
+            translations={t}
+          />
+          <div className="text-[8px] text-center opacity-20 uppercase tracking-tighter">
+            v1.1.0-sticky-fix
+          </div>
+        </div>
       </div>
     </div>
   );
