@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { Section } from "../../types";
 import QuestionRenderer from "../QuestionRenderer";
 import { useQuestionLogic } from "../../hooks/useQuestionLogic";
@@ -28,7 +28,7 @@ export default function SectionContent({
   rightWidget,
 }: SectionContentProps) {
   const { getOrderedVisibleQuestions } = useQuestionLogic();
-  const visibleQuestions = React.useMemo(() => 
+  const visibleQuestions = useMemo(() => 
     getOrderedVisibleQuestions(section.questions, answers),
     [section.questions, answers, getOrderedVisibleQuestions]
   );

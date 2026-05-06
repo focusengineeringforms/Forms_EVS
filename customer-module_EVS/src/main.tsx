@@ -3,8 +3,12 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 // Ensure React is available globally for any legacy dependencies or specific build transforms
+// We do this BEFORE any other imports that might depend on it
 if (typeof window !== "undefined") {
   (window as any).React = React;
+  (window as any).global = window;
+  // Some libraries check for process.env
+  (window as any).process = { env: { NODE_ENV: 'production' } };
 }
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
