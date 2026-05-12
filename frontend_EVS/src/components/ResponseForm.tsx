@@ -708,7 +708,7 @@ useEffect(() => {
             <img
               src={form.logoUrl}
               alt="Brand Logo"
-              className="h-10 sm:h-14 w-auto object-contain transition-all"
+              className="h-14 sm:h-20 w-auto object-contain transition-all"
             />
           )}
         </div>
