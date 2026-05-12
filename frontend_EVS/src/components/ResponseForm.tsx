@@ -233,17 +233,36 @@ useEffect(() => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-12">
-            <div className="flex flex-col items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600 mb-4"></div>
-              <span className="text-primary-600 font-medium">
-                Loading form...
-              </span>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-8 animate-in fade-in duration-700">
+          {/* Pulsing EVS Logo */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#00a651]/10 rounded-full blur-3xl animate-pulse"></div>
+            <img 
+              src="https://focus-engineering-forms.s3.amazonaws.com/forms/1715011746654-evs-logo.png" 
+              alt="EVS" 
+              className="h-16 sm:h-20 w-auto object-contain relative animate-pulse"
+            />
+          </div>
+
+          {/* Sleek Technical Progress */}
+          <div className="flex flex-col items-center space-y-3">
+            <div className="w-48 h-1 bg-gray-100 rounded-full overflow-hidden relative">
+              <div className="absolute top-0 left-0 h-full bg-[#00a651] w-1/3 animate-[loading_1.5s_infinite_ease-in-out]"></div>
             </div>
+            <span className="text-[10px] font-black text-gray-400 tracking-[0.3em] uppercase animate-pulse">
+              Initializing Portal
+            </span>
           </div>
         </div>
+        
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes loading {
+            0% { left: -40%; width: 30%; }
+            50% { width: 50%; }
+            100% { left: 110%; width: 30%; }
+          }
+        `}} />
       </div>
     );
   }
