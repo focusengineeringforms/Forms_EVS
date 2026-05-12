@@ -715,7 +715,7 @@ useEffect(() => {
       </div>
 
       <div className="flex-grow flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-4xl px-4 py-2">
+        <div className="w-full max-w-7xl px-4 py-2">
           {/* Form Title - Small and Centered */}
           <h1 className="text-sm sm:text-base font-black text-gray-400 tracking-widest uppercase text-center mb-4">
             {form.title}
