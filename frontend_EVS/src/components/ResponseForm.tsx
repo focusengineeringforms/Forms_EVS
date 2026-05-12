@@ -673,45 +673,45 @@ useEffect(() => {
   const isFirstSection = currentSectionIndex === 0;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 sm:py-4 py-0 px-2 sm:px-4 flex flex-col overflow-hidden">
-      <div className="w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center">
-        {/* Back Button */}
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col overflow-hidden">
+      {/* Sticky Compact Header */}
+      <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-neutral-100 flex items-center justify-between sticky top-0 z-50">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mb-2 transition-colors font-medium text-xs"
+          className="flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-xs"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1" />
           Back
         </button>
+        
+        <div className="flex flex-col items-center flex-grow pr-10">
+          {form.logoUrl && (
+            <img
+              src={form.logoUrl}
+              alt="Brand Logo"
+              className="h-10 sm:h-14 w-auto object-contain transition-all"
+            />
+          )}
+        </div>
+      </div>
 
-        {/* Main Form Card */}
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-neutral-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
-          {/* Form Header - Ultra Compact */}
-          <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-neutral-100 flex flex-col items-center">
-            {form.logoUrl && (
-              <img
-                src={form.logoUrl}
-                alt="Brand Logo"
-                className="h-16 sm:h-24 w-auto object-contain mb-1 transition-all hover:scale-105 duration-500"
-              />
-            )}
-            <h1 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight uppercase text-center">
-              {form.title}
-            </h1>
-          </div>
+      <div className="flex-grow flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-4xl px-4 py-2">
+          {/* Form Title - Small and Centered */}
+          <h1 className="text-sm sm:text-base font-black text-gray-400 tracking-widest uppercase text-center mb-4">
+            {form.title}
+          </h1>
 
-          {/* Form Content - Ultra Compact */}
-          <form onSubmit={handleSubmit} className="px-3 sm:px-8 py-2 bg-white dark:bg-gray-900 flex flex-col space-y-2 overflow-hidden h-full">
-            
-            {/* Questions Container - Tight Spacing */}
-            <div className="space-y-4 flex-grow">
+          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+            {/* Questions Container */}
+            <div className="space-y-6">
               {getOrderedVisibleQuestions(
                 currentSection.questions,
                 answers
               ).map((q) => (
                 <div
                   key={q.id}
-                  className="w-full flex-shrink-0"
+                  className="w-full flex flex-col items-center"
                 >
                   <QuestionRenderer
                     question={q}
@@ -720,35 +720,25 @@ useEffect(() => {
                   />
                 </div>
               ))}
-              
-              {/* Dynamic Location Question */}
-              {isLastSection && form?.locationEnabled && (
-                <div className="py-2 px-4 bg-green-50/50 rounded-xl border-l-4 border-green-500 flex items-center space-x-3">
-                  <Send className="w-4 h-4 text-green-600 -rotate-90" />
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-700 uppercase">
-                    LOCATION VERIFICATION REQUIRED *
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Navigation Buttons - Tighter Interaction */}
-            <div className="flex justify-center items-center pt-1 pb-2">
+            {/* Navigation/Submit Button */}
+            <div className="flex justify-center items-center pt-6 pb-8">
               {!isLastSection ? (
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="w-full sm:w-auto px-8 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold shadow-lg text-xs tracking-wide"
+                  className="w-full sm:w-auto px-10 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all font-bold shadow-lg text-xs tracking-wide uppercase"
                 >
                   NEXT SECTION
-                  <ArrowLeft className="w-3 h-3 ml-2 rotate-180 inline" />
+                  <ArrowLeft className="w-4 h-4 ml-2 rotate-180 inline" />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-12 py-3 bg-[#00a651] text-white rounded-full hover:bg-[#008d44] transition-all font-black shadow-xl shadow-[#00a651]/20 active:scale-95 text-xs tracking-widest uppercase"
+                  className="w-full sm:w-auto px-14 py-4 bg-[#00a651] text-white rounded-full hover:bg-[#008d44] transition-all font-black shadow-xl shadow-[#00a651]/20 active:scale-95 text-xs tracking-widest uppercase"
                 >
-                  <Check className="w-4 h-4 mr-2 inline" />
+                  <Check className="w-5 h-5 mr-2 inline" />
                   SUBMIT RESPONSE
                 </button>
               )}
