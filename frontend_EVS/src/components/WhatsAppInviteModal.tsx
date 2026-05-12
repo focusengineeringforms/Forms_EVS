@@ -204,12 +204,12 @@ const WhatsAppInviteModal: React.FC<WhatsAppInviteModalProps> = ({
   const downloadTemplate = () => {
     const templateData = [
       {
-        Phone: "+1234567890",
-        Email: "example@email.com",
+        Phone: "+971527519273",
+        Email: "customer@example.com",
       },
       {
-        Phone: "+1987654321",
-        Email: "another@email.com",
+        Phone: "0527519273",
+        Email: "another@example.com",
       },
     ];
 

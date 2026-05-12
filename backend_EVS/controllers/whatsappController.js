@@ -213,6 +213,7 @@ export const uploadWhatsAppInvites = async (req, res) => {
 };
 
 export const sendWhatsAppInvites = async (req, res) => {
+  console.log('🚀 ENTERED sendWhatsAppInvites controller');
   try {
     const { formId } = req.params;
     const { phones, language = 'en' } = req.body; 

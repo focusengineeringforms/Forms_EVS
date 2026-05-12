@@ -26,16 +26,25 @@ class WhatsAppService {
   formatPhoneNumber(phone) {
     if (!phone) return null;
 
-    const cleaned = phone.replace(/\D/g, '');
+    let cleaned = phone.replace(/\D/g, '');
 
-    if (cleaned.startsWith('91') && cleaned.length === 12) {
-      return `+${cleaned}`;
+    // Handle UAE Numbers (Dubai/Abu Dhabi)
+    // If it starts with 05 (UAE local format), replace 0 with 971
+    if (cleaned.startsWith('05') && cleaned.length === 10) {
+      cleaned = '971' + cleaned.substring(1);
+    }
+    
+    // If it's 9 digits starting with 5 (UAE mobile without 0 or 971), add 971
+    else if (cleaned.startsWith('5') && cleaned.length === 9) {
+      cleaned = '971' + cleaned;
     }
 
-    if (cleaned.length === 10) {
-      return `+91${cleaned}`;
+    // Handle Indian Numbers (10 digits starting with 6-9)
+    else if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) {
+      cleaned = '91' + cleaned;
     }
 
+    // Default to + if not present
     return `+${cleaned}`;
   }
 
@@ -122,8 +131,8 @@ Issue: ${serviceRequest.issueDescription}
 🔧 Our mechanics will diagnose & fix
 
 *Need Help?*
-Call: (555) 123-4567
-Email: support@focus-auto.com
+Call: ${process.env.WA_SHOP_PHONE || '(+971) 52 751 9273'}
+Email: ${process.env.SHOP_EMAIL || 'feedback@evsuae.com'}
 
 Request ID: ${serviceRequest.id || 'N/A'}
       `.trim();
@@ -154,10 +163,13 @@ Request ID: ${serviceRequest.id || 'N/A'}
         return { success: false, error: 'Invalid phone number' };
       }
 
+      // Use environment variable for frontend URL, with fallback
+      const baseUrl = (process.env.INVITE_FRONTEND_URL || 'https://evs-customer.focusengineeringapp.com').trim();
+
       // Force production URL
       let inviteLinkFinal = String(inviteLink || '').trim().replace(
         /http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/,
-        'https://formsuperadmin.focusengineeringapp.com'
+        baseUrl
       );
 
       // If language is NOT English, force fallback to plain text strategy
@@ -166,74 +178,24 @@ Request ID: ${serviceRequest.id || 'N/A'}
       }
 
       const v1 = inviteLinkFinal;
+      console.log(`📱 Preparing to call Twilio API for: ${customerPhone}`);
+      console.log(`   Template: ${this.inviteTemplateSid.trim()}`);
+      console.log(`   Link: ${v1}`);
+
+      const startTime = Date.now();
       const messageData = await this.client.messages.create({
         from: `whatsapp:${this.twilioPhoneNumber}`,
         to: `whatsapp:${customerPhone}`,
         contentSid: this.inviteTemplateSid.trim(),
         contentVariables: JSON.stringify({ "1": v1 }),
       });
+      const duration = Date.now() - startTime;
 
+      console.log(`✅ Twilio API Response received in ${duration}ms: SID ${messageData.sid}`);
       return { success: true, messageId: messageData.sid, status: messageData.status };
     } catch (error) {
-      try {
-        let inviteLinkFinal = String(inviteLink || '').trim().replace(
-          /http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/,
-          'https://formsuperadmin.focusengineeringapp.com'
-        );
-        
-        let finalInviteLink = inviteLinkFinal;
-        if (language === 'ar') {
-          const separator = finalInviteLink.includes('?') ? '&' : '?';
-          finalInviteLink = `${finalInviteLink}${separator}lang=ar`;
-        } else if (language === 'both') {
-          const separator = finalInviteLink.includes('?') ? '&' : '?';
-          finalInviteLink = `${finalInviteLink}${separator}lang=both`;
-        }
-
-        let body = '';
-        const enBody = `Dear Valued Customer,
-
-Thank you for your recent visit to *${tenantName}*. We continuously strive to deliver the highest level of service and would greatly appreciate your feedback on your recent car maintenance experience. 🚘✨
-
-This short survey will take no more than two minutes of your time. Please share your thoughts here:
-👉 ${finalInviteLink}
-
-Thank you in advance for your valuable feedback!
-
-Best regards, 
-*${tenantName} Team*`;
-
-        const arBody = `عميلنا العزيز،
-
-نشكرك على زيارتك الأخيرة لـ *${tenantName}*. نسعى دائماً لتقديم أعلى مستوى من الخدمة، ونقدر جداً ملاحظاتك حول تجربتك الأخيرة في صيانة سيارتك. 🚘✨
-
-لن يستغرق هذا الاستبيان القصير أكثر من دقيقتين من وقتك. يرجى مشاركة آرائك هنا:
-👉 ${finalInviteLink}
-
-شكراً لك مقدماً على ملاحظاتك القيمة!
-
-مع خالص التحية،
-*فريق ${tenantName}*`;
-
-        if (language === 'both') {
-          body = `${enBody}\n\n---\n\n${arBody}`;
-        } else if (language === 'ar') {
-          body = arBody;
-        } else {
-          body = enBody;
-        }
-
-        const msgData = await this.client.messages.create({
-          from: `whatsapp:${this.twilioPhoneNumber}`,
-          to: `whatsapp:${customerPhone}`,
-          body: body,
-        });
-        
-        return { success: true, messageId: msgData.sid, strategy: 'plain_text' };
-      } catch (fallbackError) {
-        console.error('❌ WhatsApp delivery failed:', fallbackError.message);
-        return { success: false, error: fallbackError.message };
-      }
+      console.error('❌ WhatsApp Template Delivery Failed:', error.message);
+      return { success: false, error: `WhatsApp Template Error: ${error.message}` };
     }
   }
 
@@ -274,7 +236,7 @@ ${message}
 ${estimatedCompletion ? `⏰ *Estimated Completion:* ${estimatedCompletion}` : ''}
 
 *Questions?*
-Call: (555) 123-4567
+Call: ${process.env.WA_SHOP_PHONE || '(+971) 52 751 9273'}
 Reference your request ID
       `.trim();
 
