@@ -7,6 +7,7 @@ import {
   Loader2,
   CheckCircle2,
   ShieldAlert,
+  Check,
 } from "lucide-react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import type { Question, Response, FollowUpQuestion } from "../types";
@@ -1442,46 +1443,82 @@ export default function ResponseForm({
 
   const isFirstSection = sectionNavigationHistory.length <= 1;
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-4 sm:py-8 md:py-12 lg:py-16 px-4">
-      <div className="w-full max-w-6xl mx-auto">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 sm:mb-6 mb-4 transition-colors font-medium text-sm"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Forms
-        </button>
-
-        {/* Main Form Card */}
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-neutral-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
-          {/* Main Branding Header - Final Professional Push */}
-          <div className="bg-white dark:bg-gray-900 px-6 py-10 border-b border-neutral-100 flex flex-col items-center">
-            {form?.logoUrl && (
-              <img
-                src={form.logoUrl}
-                alt="Brand Logo"
-                className="h-40 sm:h-56 w-auto object-contain mb-6 transition-all hover:scale-105 duration-500"
-              />
-            )}
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tighter uppercase text-center">
-              {form?.title || "FEEDBACK FORM"}
-            </h1>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-8 animate-in fade-in duration-700">
+          {/* Pulsing EVS Logo */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#00a651]/10 rounded-full blur-3xl animate-pulse"></div>
+            <img 
+              src="https://focus-engineering-forms.s3.amazonaws.com/forms/1715011746654-evs-logo.png" 
+              alt="EVS" 
+              className="h-16 sm:h-20 w-auto object-contain relative animate-pulse"
+            />
           </div>
 
-          {/* Form Content - Ultra Compact */}
-          <form onSubmit={handleSubmit} className="px-4 sm:px-12 py-6 bg-white dark:bg-gray-900 flex flex-col space-y-6 overflow-hidden h-full">
-            
+          {/* Sleek Technical Progress */}
+          <div className="flex flex-col items-center space-y-3">
+            <div className="w-48 h-1 bg-gray-100 rounded-full overflow-hidden relative">
+              <div className="absolute top-0 left-0 h-full bg-[#00a651] w-1/3 animate-[loading_1.5s_infinite_ease-in-out]"></div>
+            </div>
+            <span className="text-[10px] font-black text-gray-400 tracking-[0.3em] uppercase animate-pulse">
+              Initializing Portal
+            </span>
+          </div>
+        </div>
+        
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes loading {
+            0% { left: -40%; width: 30%; }
+            50% { width: 50%; }
+            100% { left: 110%; width: 30%; }
+          }
+        `}} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col overflow-hidden">
+      {/* Sticky Compact Header */}
+      <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-neutral-100 flex items-center justify-between sticky top-0 z-50">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-xs"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back
+        </button>
+        
+        <div className="flex flex-col items-center flex-grow pr-10">
+          {form?.logoUrl && (
+            <img
+              src={form.logoUrl}
+              alt="Brand Logo"
+              className="h-14 sm:h-20 w-auto object-contain transition-all"
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="flex-grow flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-4xl px-4 py-2">
+          {/* Form Title - Small and Centered */}
+          <h1 className="text-sm sm:text-base font-black text-gray-400 tracking-widest uppercase text-center mb-4">
+            {form?.title}
+          </h1>
+
+          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             {/* Questions Container */}
-            <div className="space-y-6 flex-grow">
+            <div className="space-y-6">
               {getOrderedVisibleQuestions(
                 currentSection?.questions || [],
                 answers
               ).map((q) => (
                 <div
                   key={q.id}
-                  className="w-full flex-shrink-0"
+                  className="w-full flex flex-col items-center"
                 >
                   <QuestionRenderer
                     question={q}
@@ -1490,38 +1527,33 @@ export default function ResponseForm({
                   />
                 </div>
               ))}
-              
-              {/* Dynamic Location Question */}
-              {isLastSection && form?.locationEnabled && (
-                <div className="py-2 px-4 bg-green-50/50 rounded-xl border-l-4 border-green-500 flex items-center space-x-3 mt-4">
-                  <Send className="w-4 h-4 text-green-600 -rotate-90" />
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-700 uppercase">
-                    LOCATION VERIFICATION REQUIRED *
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-center items-center pt-4">
+            {/* Navigation/Submit Button */}
+            <div className="flex justify-center items-center pt-6 pb-8">
               {!isLastSection ? (
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="w-full sm:w-auto px-10 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold shadow-lg text-sm tracking-wide uppercase"
+                  className="w-full sm:w-auto px-10 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all font-bold shadow-lg text-xs tracking-wide uppercase"
                 >
                   NEXT SECTION
+                  <ArrowLeft className="w-4 h-4 ml-2 rotate-180 inline" />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-12 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all font-black shadow-xl shadow-green-600/30 ring-4 ring-green-600/10 active:scale-95 text-sm tracking-widest uppercase disabled:cursor-not-allowed"
-                  disabled={
-                    (form?.locationEnabled && !locationConfirmation) ||
-                    isSubmitting
-                  }
+                  className="w-full sm:w-auto px-14 py-4 bg-[#00a651] text-white rounded-full hover:bg-[#008d44] transition-all font-black shadow-xl shadow-[#00a651]/20 active:scale-95 text-xs tracking-widest uppercase disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
                 >
-                  {isSubmitting ? "SUBMITTING..." : "SUBMIT RESPONSE"}
+                  {isSubmitting ? (
+                    "SUBMITTING..."
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5 mr-2 inline" />
+                      SUBMIT RESPONSE
+                    </>
+                  )}
                 </button>
               )}
             </div>

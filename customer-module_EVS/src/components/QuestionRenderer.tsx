@@ -301,7 +301,7 @@ export default function QuestionRenderer({
   }
 
   return (
-    <div className="space-y-1 md:space-y-1.5" data-error={!!error}>
+    <div className="space-y-1 md:space-y-1.5 flex flex-col items-center text-center" data-error={!!error}>
       {question.imageUrl ? (
         <div className="relative inline-flex mb-1">
           <img
@@ -319,8 +319,8 @@ export default function QuestionRenderer({
         <label
           className={`block font-extrabold text-sm md:text-base tracking-wide leading-snug uppercase ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}
           style={(() => {
-            if (language === 'ar' || language === 'both') return { fontFamily: 'Tahoma, Arial, sans-serif', textAlign: 'right' as const };
-            return { textAlign: 'left' as const };
+            if (language === 'ar' || language === 'both') return { fontFamily: 'Tahoma, Arial, sans-serif', textAlign: 'center' as const };
+            return { textAlign: 'center' as const };
           })()}
         >
           {questionText}

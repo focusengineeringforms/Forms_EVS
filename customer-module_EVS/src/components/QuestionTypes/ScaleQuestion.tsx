@@ -48,70 +48,51 @@ export default function ScaleQuestion({
   const isLargeScale = max > 5;
 
   return (
-    <div className={`space-y-6 py-4 w-full max-w-4xl mx-auto transition-all duration-500`}>
-      
-      {/* Circular Buttons Container */}
-      <div className={`relative overflow-visible ${isLargeScale ? 'px-1' : ''}`}>
-        
-        <div className={`flex items-center ${isLargeScale ? 'justify-between sm:justify-between w-full gap-1 sm:gap-2' : 'justify-center gap-3 sm:gap-10'} py-2 no-scrollbar flex-nowrap overflow-x-auto overflow-y-visible`}>
-
-          {options.map((val) => {
-            const isSelected = value === val.toString();
-            
-            // Branding colors based on the value
-            const getButtonStyles = () => {
-              if (isSelected) {
-                if (isLargeScale) {
-                  return 'bg-[#2563EB] border-[#2563EB] text-white shadow-lg shadow-blue-500/30 scale-110';
-                } else {
-                  return 'bg-[#E11D48] border-[#E11D48] text-white shadow-lg shadow-rose-500/30 scale-110';
-                }
-              }
-              return darkMode 
-                ? 'bg-[#0B0C10] border-slate-800 text-slate-400 hover:border-slate-600 hover:text-white' 
-                : 'bg-white border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-600';
-            };
-
-            return (
-              <button
-                key={val}
-                type="button"
-                onClick={() => {
-                  if (readOnly) return;
-                  const stringVal = val.toString();
-                  onChange(value === stringVal ? "" : stringVal);
-                }}
-                disabled={readOnly}
-                className={`shrink-0 relative rounded-full flex items-center justify-center font-extrabold transition-all duration-300
-                  ${isLargeScale 
-                    ? "w-[28px] h-[28px] min-[360px]:w-[30px] min-[360px]:h-[30px] min-[400px]:w-9 min-[400px]:h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 text-[11px] min-[360px]:text-xs sm:text-lg md:text-xl" 
-                    : "w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 text-sm sm:text-xl md:text-2xl"} 
-                  ${getButtonStyles()} border-[1.5px] sm:border-2
-                  ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md active:scale-90'} 
-                  z-10
-                `}
-              >
-                {val}
-              </button>
-            );
-          })}
+    <div className="space-y-2 px-1 py-1 w-full max-w-2xl transition-all duration-300 mx-auto">
+      <div className="relative group overflow-visible py-1">
+        <div className={`flex flex-wrap justify-center ${max > 5 ? 'gap-1 sm:gap-2' : 'gap-1.5 sm:gap-3'} mt-0.5 overflow-visible`}>
+        {options.map((val) => {
+          const isSelected = value === val.toString();
+          const isLargeScale = max > 5;
+          
+          return (
+            <button
+              key={val}
+              type="button"
+              onClick={() => {
+                if (readOnly) return;
+                const stringVal = val.toString();
+                onChange(value === stringVal ? "" : stringVal);
+              }}
+              disabled={readOnly}
+              className={`relative rounded-full flex items-center justify-center font-black transition-all duration-300
+                ${isLargeScale 
+                  ? "w-7 h-7 sm:w-10 sm:h-10 text-[10px] sm:text-base" 
+                  : "w-9 h-9 sm:w-12 sm:h-12 text-sm sm:text-lg"} 
+                ${isSelected 
+                  ? "bg-[#00a651] border-[#00a651] text-white shadow-lg shadow-[#00a651]/20 scale-110 z-20" 
+                  : "bg-white border-slate-200 text-slate-500 hover:border-[#00a651] hover:text-[#00a651] z-10"} 
+                border-2 ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer active:scale-90'}
+              `}
+            >
+              {val}
+            </button>
+          );
+        })}
         </div>
       </div>
 
-      {/* Labels below the scale */}
-      <div className="flex justify-between items-center w-full mt-4 px-4">
-         <div className="flex flex-col items-start gap-1">
-            <span className={`text-xs md:text-sm font-black uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>0</span>
-            <span className={`text-xs md:text-sm font-bold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{leftLabel}</span>
-         </div>
-         
-         <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-transparent via-slate-200 to-transparent opacity-50" />
-
-         <div className="flex flex-col items-end gap-1">
-            <span className={`text-xs md:text-sm font-black uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{max}</span>
-            <span className={`text-xs md:text-sm font-bold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{rightLabel}</span>
-         </div>
+      <div className="flex justify-between items-center w-full px-2">
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black text-gray-300 uppercase leading-none mb-0.5">{min}</span>
+          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-tighter">{leftLabel}</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black text-gray-300 uppercase leading-none mb-0.5">{max}</span>
+          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-tighter">{rightLabel}</span>
+        </div>
       </div>
+    </div>
 
     </div>
   );
