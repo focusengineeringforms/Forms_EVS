@@ -673,35 +673,35 @@ useEffect(() => {
   const isFirstSection = currentSectionIndex === 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-4 sm:py-8 md:py-12 lg:py-16 px-4">
-      <div className="w-full max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white dark:bg-gray-950 sm:py-4 py-0 px-2 sm:px-4 flex flex-col overflow-hidden">
+      <div className="w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 sm:mb-6 mb-4 transition-colors font-medium text-sm"
+          className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mb-2 transition-colors font-medium text-xs"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Forms
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
         </button>
 
         {/* Main Form Card */}
         <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-neutral-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
           {/* Form Header - Ultra Compact */}
-          <div className="bg-white dark:bg-gray-900 px-6 py-10 border-b border-neutral-100 flex flex-col items-center">
+          <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-neutral-100 flex flex-col items-center">
             {form.logoUrl && (
               <img
                 src={form.logoUrl}
                 alt="Brand Logo"
-                className="h-40 sm:h-56 w-auto object-contain mb-6 transition-all hover:scale-105 duration-500"
+                className="h-16 sm:h-24 w-auto object-contain mb-1 transition-all hover:scale-105 duration-500"
               />
             )}
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tighter uppercase text-center">
+            <h1 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight uppercase text-center">
               {form.title}
             </h1>
           </div>
 
           {/* Form Content - Ultra Compact */}
-          <form onSubmit={handleSubmit} className="px-4 sm:px-12 py-4 bg-white dark:bg-gray-900 flex flex-col space-y-4 overflow-hidden h-full">
+          <form onSubmit={handleSubmit} className="px-3 sm:px-8 py-2 bg-white dark:bg-gray-900 flex flex-col space-y-2 overflow-hidden h-full">
             
             {/* Questions Container - Tight Spacing */}
             <div className="space-y-4 flex-grow">
@@ -733,22 +733,22 @@ useEffect(() => {
             </div>
 
             {/* Navigation Buttons - Tighter Interaction */}
-            <div className="flex justify-center items-center pt-2">
+            <div className="flex justify-center items-center pt-1 pb-2">
               {!isLastSection ? (
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="w-full sm:w-auto px-10 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold shadow-lg text-sm tracking-wide"
+                  className="w-full sm:w-auto px-8 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold shadow-lg text-xs tracking-wide"
                 >
                   NEXT SECTION
-                  <ArrowLeft className="w-4 h-4 ml-2 rotate-180 inline" />
+                  <ArrowLeft className="w-3 h-3 ml-2 rotate-180 inline" />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-12 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition-all font-black shadow-xl shadow-green-600/30 ring-4 ring-green-600/10 active:scale-95 text-sm tracking-widest uppercase"
+                  className="w-full sm:w-auto px-10 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 transition-all font-black shadow-lg shadow-emerald-600/30 active:scale-95 text-xs tracking-widest uppercase"
                 >
-                  <Send className="w-5 h-5 mr-3 inline" />
+                  <Send className="w-4 h-4 mr-2 inline" />
                   SUBMIT RESPONSE
                 </button>
               )}

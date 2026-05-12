@@ -343,13 +343,13 @@ export default function QuestionRenderer({
         </div>
       ) : null}
       {showLabel ? (
-        <label className={`block uppercase tracking-wide mb-2 ${isFollowUp ? "text-xs font-bold text-blue-700 dark:text-blue-400" : "text-sm font-bold text-gray-800 dark:text-gray-200"}`}>
+        <label className={`block uppercase tracking-tight mb-1 ${isFollowUp ? "text-[10px] font-bold text-blue-700 dark:text-blue-400" : "text-xs font-black text-gray-800 dark:text-gray-200"}`}>
           {questionText}
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       ) : null}
       {question.description ? (
-        <p className={`mb-2 ${isFollowUp ? "text-xs text-blue-600 dark:text-blue-400" : "text-sm text-gray-500 dark:text-gray-500"}`}>{question.description}</p>
+        <p className={`mb-1 ${isFollowUp ? "text-[9px] text-blue-600 dark:text-blue-400" : "text-[10px] text-gray-500 dark:text-gray-500"}`}>{question.description}</p>
       ) : null}
       {renderInput()}
     </div>
