@@ -142,7 +142,7 @@ const router = createBrowserRouter(
         { path: "/", element: <RootRedirect /> },
         { path: "/forms/preview", element: <FormsPreview /> },
 
-        { path: "/forms/:id/respond", element: <ResponseForm /> },
+        { path: "/:tenantSlug?/forms/:id/respond", element: <ResponseForm /> },
         { path: "/followup/demo", element: <FollowUpFormDemo /> },
         {
           path: "/followup/forms/:id/respond",

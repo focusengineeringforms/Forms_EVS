@@ -35,9 +35,8 @@ export default function ScaleQuestion({
   return (
     <div className="space-y-2 px-1 py-1 w-full max-w-2xl transition-all duration-300">
       
-      {/* Circular Buttons Container */}
       <div className="relative group overflow-visible py-1">
-        <div className={`flex flex-wrap justify-start ${max > 5 ? 'gap-1 sm:gap-2' : 'gap-1.5 sm:gap-3'} mt-0.5 overflow-visible`}>
+        <div className={`flex flex-wrap justify-center ${max > 5 ? 'gap-1 sm:gap-2' : 'gap-1.5 sm:gap-3'} mt-0.5 overflow-visible`}>
         {options.map((val) => {
           const isSelected = value === val.toString();
           const isLargeScale = max > 5;

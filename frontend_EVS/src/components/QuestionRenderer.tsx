@@ -329,7 +329,7 @@ export default function QuestionRenderer({
   const showLabel = questionText.length > 0;
 
   return (
-    <div className="space-y-1 flex flex-col items-start text-left w-full max-w-2xl" data-error={!!error}>
+    <div className="space-y-1 flex flex-col items-center text-center w-full max-w-2xl mx-auto" data-error={!!error}>
       {question.imageUrl ? (
         <div className="relative inline-flex">
           <img
