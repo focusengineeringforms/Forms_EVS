@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Send, ArrowLeft, AlertCircle } from "lucide-react";
+import { Send, ArrowLeft, AlertCircle, Check } from "lucide-react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import type { Question, Response, FollowUpQuestion } from "../types";
 import QuestionRenderer from "./QuestionRenderer";
@@ -746,9 +746,9 @@ useEffect(() => {
               ) : (
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-10 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 transition-all font-black shadow-lg shadow-emerald-600/30 active:scale-95 text-xs tracking-widest uppercase"
+                  className="w-full sm:w-auto px-12 py-3 bg-[#00a651] text-white rounded-full hover:bg-[#008d44] transition-all font-black shadow-xl shadow-[#00a651]/20 active:scale-95 text-xs tracking-widest uppercase"
                 >
-                  <Send className="w-4 h-4 mr-2 inline" />
+                  <Check className="w-4 h-4 mr-2 inline" />
                   SUBMIT RESPONSE
                 </button>
               )}
