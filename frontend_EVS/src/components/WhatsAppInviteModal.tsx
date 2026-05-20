@@ -71,6 +71,7 @@ const WhatsAppInviteModal: React.FC<WhatsAppInviteModalProps> = ({
   const [sendResults, setSendResults] = useState<any>(null);
   const [language, setLanguage] = useState<'en' | 'ar' | 'both'>('en');
   const [error, setError] = useState<string | null>(null);
+  const [sendingProgress, setSendingProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
   const navigate = useNavigate();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -140,20 +141,79 @@ const WhatsAppInviteModal: React.FC<WhatsAppInviteModalProps> = ({
           email: item.email || "",
         }));
 
-      const response = await apiClient.sendWhatsAppInvites(formId, {
-        phones: phonesToSend,
-        language
-      });
+      const total = phonesToSend.length;
+      setSendingProgress({ current: 0, total });
 
-      if (response.success || (response.data && (response.data.sent > 0 || response.data.failed > 0))) {
-        setSendResults(response.data);
-        setStep("complete");
-        if (!response.success) {
-            setError(response.message || "Some invites failed to send");
+      const batchSize = 15;
+      const allFailures: any[] = [];
+      const allResults: any[] = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+      let lastError: string | null = null;
+
+      for (let i = 0; i < total; i += batchSize) {
+        const batch = phonesToSend.slice(i, i + batchSize);
+        
+        try {
+          const response = await apiClient.sendWhatsAppInvites(formId, {
+            phones: batch,
+            language
+          });
+
+          if (response.data) {
+            totalSent += response.data.sent || 0;
+            totalFailed += response.data.failed || 0;
+            if (response.data.failures) {
+              allFailures.push(...response.data.failures);
+            }
+            if (response.data.results) {
+              allResults.push(...response.data.results);
+            }
+          } else {
+            if (response.success) {
+              totalSent += batch.length;
+            } else {
+              totalFailed += batch.length;
+              batch.forEach(item => {
+                allFailures.push({
+                  phone: item.phone,
+                  reason: response.message || "Failed to send batch"
+                });
+              });
+            }
+          }
+
+          if (!response.success && !response.data) {
+            lastError = response.message || "Some invites failed to send";
+          }
+        } catch (batchErr: any) {
+          console.error(`Error sending batch starting at index ${i}:`, batchErr);
+          totalFailed += batch.length;
+          batch.forEach(item => {
+            allFailures.push({
+              phone: item.phone,
+              reason: batchErr.message || "Connection timeout or network failure"
+            });
+          });
+          lastError = batchErr.message || "Connection timeout or network failure";
         }
-      } else {
-        setError(response.message || "Failed to send invites");
-        setStep("preview");
+
+        const currentSentCount = Math.min(i + batch.length, total);
+        setSendingProgress({ current: currentSentCount, total });
+      }
+
+      const finalResults = {
+        sent: totalSent,
+        failed: totalFailed,
+        results: allResults,
+        failures: allFailures
+      };
+
+      setSendResults(finalResults);
+      setStep("complete");
+
+      if (totalFailed > 0) {
+        setError(lastError || "Some invites failed to send");
       }
     } catch (err: any) {
       setError(err.message || "Sending failed");
@@ -455,14 +515,30 @@ const WhatsAppInviteModal: React.FC<WhatsAppInviteModalProps> = ({
             )}
 
             {step === "sending" && (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-6"></div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Sending WhatsApp Invites...
+              <div className="text-center py-12 px-6 bg-slate-50/50 rounded-2xl border border-slate-100 max-w-md mx-auto my-6 shadow-sm">
+                <div className="relative w-24 h-24 mx-auto mb-8 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-t-green-600 border-r-green-600 animate-spin"></div>
+                  <div className="text-xl font-extrabold text-slate-800">
+                    {sendingProgress.total > 0 ? Math.round((sendingProgress.current / sendingProgress.total) * 100) : 0}%
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  Sending WhatsApp Invites
                 </h3>
-                <p className="text-gray-600">
-                  Please wait while we send invites to {selectedPhones.size} recipients
+                
+                <p className="text-sm font-medium text-slate-600 mb-6">
+                  Processing: <span className="text-green-600 font-semibold">{sendingProgress.current}</span> of <span className="font-semibold">{sendingProgress.total}</span> recipients
                 </p>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-150 h-3 rounded-full overflow-hidden shadow-inner p-0.5 border border-slate-200/50">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-green-600 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${sendingProgress.total > 0 ? (sendingProgress.current / sendingProgress.total) * 100 : 0}%` }}
+                  ></div>
+                </div>
               </div>
             )}
 

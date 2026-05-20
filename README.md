@@ -371,7 +371,7 @@ Ensure your `backend/.env` is set exactly like this for global reach:
 ```env
 WA_TWILIO_ACCOUNT_SID=your_twilio_account_sid
 WA_TWILIO_AUTH_TOKEN=your_twilio_auth_token
-WA_TWILIO_WHATSAPP_NUMBER=+919486240282
+WA_TWILIO_WHATSAPP_NUMBER=+971527519273
 WA_TWILIO_INVITE_TEMPLATE_SID=your_template_sid
 ```
 

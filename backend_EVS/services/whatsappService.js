@@ -20,6 +20,7 @@ class WhatsAppService {
     }
 
     this.twilioPhoneNumber = (process.env.WA_TWILIO_WHATSAPP_NUMBER || process.env.TWILIO_WHATSAPP_NUMBER || '').trim();
+    console.log(`📱 WhatsApp Sender Number: ${this.twilioPhoneNumber || 'NOT CONFIGURED'}`);
     this.inviteTemplateSid = (process.env.WA_TWILIO_INVITE_TEMPLATE_SID || process.env.TWILIO_INVITE_TEMPLATE_SID || '').trim();
   }
 
