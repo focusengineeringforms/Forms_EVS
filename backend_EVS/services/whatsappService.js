@@ -178,10 +178,24 @@ Request ID: ${serviceRequest.id || 'N/A'}
         throw new Error('MULTILINGUAL_STRATEGY');
       }
 
-      const v1 = inviteLinkFinal;
+      let v1 = inviteLinkFinal;
+      
+      // If using the approved dynamic/button template SIDs, strip the base URL prefix
+      if (['HXf0ce62599ceb23e409faea968f99691e', 'HX08092390c1106494501228c443a1a208'].includes(this.inviteTemplateSid.trim())) {
+        try {
+          const parsedUrl = new URL(inviteLinkFinal);
+          // Strip leading slash from the path (e.g., "/evs/forms" -> "evs/forms")
+          v1 = (parsedUrl.pathname + parsedUrl.search).replace(/^\//, '');
+        } catch (e) {
+          // Fallback to basic string replace if URL parsing fails
+          v1 = inviteLinkFinal.replace(baseUrl, '').replace(/^\//, '');
+        }
+        console.log(`ℹ️ Dynamic button template detected. Stripped base URL. Suffix parameter v1: ${v1}`);
+      }
+
       console.log(`📱 Preparing to call Twilio API for: ${customerPhone}`);
       console.log(`   Template: ${this.inviteTemplateSid.trim()}`);
-      console.log(`   Link: ${v1}`);
+      console.log(`   Link parameter: ${v1}`);
 
       const startTime = Date.now();
       const messageData = await this.client.messages.create({

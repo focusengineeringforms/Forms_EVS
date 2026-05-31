@@ -188,14 +188,37 @@ const WhatsAppInviteModal: React.FC<WhatsAppInviteModalProps> = ({
           }
         } catch (batchErr: any) {
           console.error(`Error sending batch starting at index ${i}:`, batchErr);
-          totalFailed += batch.length;
-          batch.forEach(item => {
-            allFailures.push({
-              phone: item.phone,
-              reason: batchErr.message || "Connection timeout or network failure"
+          
+          // Check if it is a structured ApiError containing parsed JSON response from the server
+          const errorResponse = batchErr.response;
+          if (errorResponse && errorResponse.data) {
+            const resData = errorResponse.data;
+            totalSent += resData.sent || 0;
+            totalFailed += resData.failed || 0;
+            if (resData.failures && Array.isArray(resData.failures)) {
+              allFailures.push(...resData.failures);
+            } else {
+              batch.forEach(item => {
+                allFailures.push({
+                  phone: item.phone,
+                  reason: errorResponse.message || batchErr.message || "Failed to send batch"
+                });
+              });
+            }
+            if (resData.results && Array.isArray(resData.results)) {
+              allResults.push(...resData.results);
+            }
+            lastError = errorResponse.message || batchErr.message || "Some invites failed to send";
+          } else {
+            totalFailed += batch.length;
+            batch.forEach(item => {
+              allFailures.push({
+                phone: item.phone,
+                reason: batchErr.message || "Connection timeout or network failure"
+              });
             });
-          });
-          lastError = batchErr.message || "Connection timeout or network failure";
+            lastError = batchErr.message || "Connection timeout or network failure";
+          }
         }
 
         const currentSentCount = Math.min(i + batch.length, total);

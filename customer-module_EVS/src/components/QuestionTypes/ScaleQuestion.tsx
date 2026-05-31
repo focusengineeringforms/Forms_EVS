@@ -93,8 +93,6 @@ export default function ScaleQuestion({
         </div>
       </div>
     </div>
-
-    </div>
   );
 }
 
